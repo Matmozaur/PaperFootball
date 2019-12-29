@@ -24,7 +24,7 @@ class Gen_Model():
 
     def fit(self, states, targets, epochs, verbose, validation_split, batch_size):
         return self.model.fit(states, targets, epochs=epochs, verbose=verbose, validation_split=validation_split,
-                              batch_size=batch_size)
+                              batch_size=batch_size, shuffle=False)
 
     def write(self, game, version):
         self.model.save(run_folder + 'models/version' + "{0:0>4}".format(version) + '.h5')

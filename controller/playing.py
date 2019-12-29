@@ -112,7 +112,7 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
     players = {1: p1, -1: p2}
     for e in range(episodes):
         print('game', e)
-        print(sys.getsizeof(memory.ltmemory))
+        # print(sys.getsizeof(memory.ltmemory))
         env.reset()
         done, result = 0, 0
         if random.randint(0, 1) > 0.5:
@@ -120,9 +120,15 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
         turn = 0
         while done == 0:
             move = players[env.currentPlayer].get_move(env, turn, random_moves)
-            if len(move) > 0:
-                memory.append_stmemory(env.currentPlayer, move[3], move[1])
-                print(move[1],'      ',move[0])
+            if move is not None:
+                if len(move) > 0:
+                    # To be changed 1!
+                    if len(memory.ltmemory) >= 1.5*config.MEMORY_SIZE:
+                        memory.ltmemory.popleft()
+                    if turn > 7:
+                        memory.append_stmemory(env.currentPlayer, move[3], move[1])
+                # memory.append_stmemory(env.currentPlayer, move[3], move[1])
+                # print(move[1],'      ',move[0])
             done, result = env.make_move(move)
             if done == 1:
                 memory.commit_stmemory(env, result)
@@ -134,9 +140,9 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
 def play_valid(p1, p2, episodes, random_moves=0):
     env = Game()
     players = {1: p1, -1: p2}
-    scores = {p1.name: 0, p2.name: 0}
+    scores = {p1.name: 0, p2.name: 0, 'starting_player': 0, 'non-starting_player': 0, }
     for e in range(int(episodes / 2)):
-        print(e)
+        print('First half, game ',e)
         env.reset()
         env.currentPlayer = 1
         done, result = 0, 0
@@ -151,7 +157,11 @@ def play_valid(p1, p2, episodes, random_moves=0):
                 scores[players[-env.currentPlayer].name] += max(0, -result)
             # print('CHANGE PLAYER!!!')
             env.change_player()
+            turn += 1
+    scores['starting_player'] = scores[p1.name] - scores[p2.name]
+    scores['non-starting_player'] = int(episodes / 2) - scores[p1.name] + scores[p2.name]
     for e in range(int(episodes / 2)):
+        print('Secound half, game ',e)
         env.reset()
         env.currentPlayer = -1
         done, result = 0, 0
@@ -164,4 +174,6 @@ def play_valid(p1, p2, episodes, random_moves=0):
                 scores[players[-env.currentPlayer].name] += max(0, -result)
             env.change_player()
             turn += 1
+    scores['starting_player'] += scores[p2.name]
+    scores['non-starting_player'] += int(episodes / 2) - scores[p2.name]
     return scores

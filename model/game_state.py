@@ -205,6 +205,8 @@ class GameState:
         @return: done and result
         """
         # print(move)
+        if move is None:
+            return 1, -1
         if len(move) == 0:
             return 1, -1
         self.current_position = move[1]

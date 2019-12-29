@@ -144,7 +144,7 @@ import numpy as np
 
 
 class Agent:
-    def __init__(self, name, model, random_moves=0):
+    def __init__(self, name, model):
         self.name = name
         self.model = model
 
@@ -155,7 +155,7 @@ class Agent:
             training_states = np.array([self.model.convertToModelInput_fit(row['state']) for row in memory.ltmemory])
             training_targets = {'value_head': np.array([row['result'] for row in memory.ltmemory])}
             print(training_states.shape)
-            self.model.fit(training_states, training_targets, epochs=config.EPOCHS, verbose=1, validation_split=0.2,
+            self.model.fit(training_states, training_targets, epochs=config.EPOCHS, verbose=1, validation_split=0.1,
                            batch_size=config.BATCH_SIZE)
 
     #             self.train_overall_loss.append(round(fit.history['loss'][config.EPOCHS - 1], 4))
@@ -165,7 +165,7 @@ class Agent:
     def get_move(self, env, turn, random_moves):
         best_move, best_score = None, -100
         all_moves = env.get_all_allowed_moves()
-        print(len(all_moves))
+        # print(len(all_moves))
         if len(all_moves) > 1000:
             all_moves = random.sample(all_moves, 1000)
         for move in all_moves:
