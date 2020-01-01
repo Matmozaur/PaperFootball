@@ -162,11 +162,11 @@ class Agent:
     #             self.train_value_loss.append(round(fit.history['value_head_loss'][config.EPOCHS - 1], 4))
     #             self.train_policy_loss.append(round(fit.history['policy_head_loss'][config.EPOCHS - 1], 4))
 
-    def get_move(self, env, turn, random_moves):
+    def get_move(self, env, turn=1, random_moves=0):
         best_move, best_score = None, -100
         # print('get moves')
         all_moves = env.get_all_allowed_moves()
-        # print(len(all_moves))
+        print(len(all_moves))
         if len(all_moves) > 1000:
             all_moves = random.sample(all_moves, 1000)
         for move in all_moves:
@@ -179,7 +179,7 @@ class Agent:
                 best_move = move
                 # if sc == 100:
                 #     return best_move
-        # print(best_score)
+        print(best_score)
         return best_move
 
     def score_move(self, move, env, turn, random_moves):

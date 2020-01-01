@@ -75,29 +75,6 @@ def main_train():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 file = open('temp', 'rb')
 b=pickle.load(file)
 playerFw = Agent('forwardrandom_player', ForwardModel(),)
