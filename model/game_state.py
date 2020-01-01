@@ -9,9 +9,8 @@ class GameState:
         self.playerTurn = player_turn
         self.current_position = current_position
 
-    def turn_board(self, board=None):
-        if board is None:
-            board = self.board
+    @staticmethod
+    def turn_board(board=None):
         board2 = np.zeros((48, 8), dtype=int)
         board2[1::4, 0] = 1
         board2[:5, :] = 1
@@ -164,37 +163,56 @@ class GameState:
     def get_full_moves(self):
         full_moves = []
 
-        def get_full_moves_utils(self, path, board, tmp_current_pos):
+        def check_for_danger(board, tmp_current_pos):
+            board_temp = GameState.turn_board(board)
+            local_moves = []
+            get_full_moves_utils(self, [], board_temp, tmp_current_pos, local_moves, safety=False)
+            if not local_moves:
+                return 1
+            elif local_moves[0][2] == 1:
+                return -1
+            return 0
+
+        def get_full_moves_utils(self, path, board, tmp_current_pos, full_moves, safety=True):
             if len(full_moves) >config.max_t:
                 return
             if tmp_current_pos != self.current_position and len(self._allowed_actions(board, tmp_current_pos)) == 7:
+                if safety:
+                    checker = check_for_danger(board, tmp_current_pos)
+                    if checker == -1:
+                        return
+                    if checker == 1:
+                        full_moves.append((path, tmp_current_pos, 1, board))
+                        return
                 full_moves.append((path, tmp_current_pos, 0, board))
                 return
-            if tmp_current_pos in {(0, 3), (0, 4), (0, 5)}:
-                full_moves.append((path, tmp_current_pos, 1, board))
-            if tmp_current_pos in {(12, 3), (12, 4), (12, 5)}:
+            elif tmp_current_pos in {(12, 3), (12, 4), (12, 5)}:
                 return
+            if tmp_current_pos in {(0, 3), (0, 4), (0, 5)}:
+                full_moves.clear()
+                full_moves.append((path, tmp_current_pos, 1, board))
             # print(self._allowed_actions(board,tmp_current_pos))
-            for neighbour in self._allowed_actions(board, tmp_current_pos):
-                tmp_board = board.copy()
-                tmp_path = path.copy()
-                positions = self.get_positions(neighbour[0], neighbour[1])
-                if positions[0] == tmp_current_pos:
-                    x, y = positions[1]
-                else:
-                    x, y = positions[0]
+            else:
+                for neighbour in self._allowed_actions(board, tmp_current_pos):
+                    tmp_board = board.copy()
+                    tmp_path = path.copy()
+                    positions = self.get_positions(neighbour[0], neighbour[1])
+                    if positions[0] == tmp_current_pos:
+                        x, y = positions[1]
+                    else:
+                        x, y = positions[0]
 
-                # print(x,y)
-                tmp_board[neighbour] = 1
-                tmp_path.append(neighbour)
-                # print('tmp_path: ', tmp_path)
-                # print('tmp_board: ', tmp_board)
-                # print('tmp_current_pos: ', tmp_current_pos)
-                # print('neighbour: ', neighbour)
+                    # print(x,y)
+                    tmp_board[neighbour] = 1
+                    tmp_path.append(neighbour)
+                    # print('tmp_path: ', tmp_path)
+                    # print('tmp_board: ', tmp_board)
+                    # print('tmp_current_pos: ', tmp_current_pos)
+                    # print('neighbour: ', neighbour)
 
-                get_full_moves_utils(self, tmp_path, tmp_board, (x, y))
+                    get_full_moves_utils(self, tmp_path, tmp_board, (x, y), full_moves, safety=safety)
 
-        get_full_moves_utils(self, [], self.board, self.current_position)
+        get_full_moves_utils(self, [], self.board, self.current_position, full_moves)
         return full_moves
 
     def make_move(self, move):
@@ -216,6 +234,7 @@ class GameState:
         if move[2] == 0:
             done = 0
         return done, move[2]
+
 
 # # from article
 #     def _allowedActions(self, allowed = [], path = []):

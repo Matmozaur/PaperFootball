@@ -164,17 +164,22 @@ class Agent:
 
     def get_move(self, env, turn, random_moves):
         best_move, best_score = None, -100
+        # print('get moves')
         all_moves = env.get_all_allowed_moves()
         # print(len(all_moves))
         if len(all_moves) > 1000:
             all_moves = random.sample(all_moves, 1000)
         for move in all_moves:
             sc = self.score_move(move, env, turn, random_moves)
+            # print(sc)
+            if move[2] == 1:
+                return move
             if sc > best_score:
                 best_score = sc
                 best_move = move
-                if sc == 100:
-                    return best_move
+                # if sc == 100:
+                #     return best_move
+        # print(best_score)
         return best_move
 
     def score_move(self, move, env, turn, random_moves):
