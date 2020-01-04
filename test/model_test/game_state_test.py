@@ -73,30 +73,19 @@ class GameStateTest(unittest.TestCase):
         self.assertEqual(game.gameState.get_positions(43, 3), positions)
 
     def test_allowed_actions_start(self):
-        pass
-        # game = Game()
-        # board = np.zeros((48, 8), dtype=int)
-        # board[:48, :8] = 1
-        # # print(board)
-        # self.assertEqual(game.gameState.turn_board(board).tolist(), board.tolist())
+        game = Game()
+        allowed = {(24, 3), (24, 4), (21, 4), (25, 4), (22, 3), (27, 3), (26, 4), (23, 4)}
+        self.assertEqual(set(game.gameState.allowed_actions()), allowed)
 
     def test_allowed_actions_after_by_corner(self):
-        pass
-        # game = Game()
-        # board = game.gameState.board.copy()
-        # game.gameState.board[18, 5] = 1
-        # game.gameState.board[28, 6] = 1
-        # board[30, 2] = 1
-        # board[20, 1] = 1
-        # self.assertEqual(game.gameState.turn_board(game.gameState.board).tolist(), board.tolist())
+        game = Game()
+        board = game.gameState.board.copy()
+        board[26, 4] = 1
+        board[30, 5] = 1
+        board[33, 6] = 1
+        board[38, 6] = 1
+        board[37, 7] = 1
+        board[36, 7] = 1
+        allowed = {(39, 7), (34, 7)}
+        self.assertEqual(set(game.gameState.allowed_actions(board, (9, 8))), allowed)
 
-    def test_allowed_actions_gate(self):
-        pass
-        # game = Game()
-        # board = game.gameState.board.copy()
-        # game.gameState.board[4, 0] = 1
-        # game.gameState.board[42, 0] = 1
-        # game.gameState.board[6, 7] = 1
-        # board[44, 7] = 1
-        # board[6, 7] = 1
-        # board[42, 0] = 1

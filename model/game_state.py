@@ -73,7 +73,9 @@ class GameState:
         """
         if tmp_board is not None and tmp_current_position is not None:
             neighbours = self.get_neighbours(tmp_current_position)
+            print(neighbours)
             allowed = [self.get_move(tmp_current_position, x) for x in neighbours]
+            print(allowed)
             allowed = [x for x in allowed if tmp_board[x[0], x[1]] == 0]
         else:
             neighbours = self.get_neighbours(self.current_position)
