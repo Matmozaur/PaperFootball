@@ -2,6 +2,8 @@ import unittest
 import numpy as np
 
 from model.game import Game
+from model.game_state import GameState
+from view.board_gui import BoardGui
 
 
 class GameStateTest(unittest.TestCase):
@@ -88,4 +90,71 @@ class GameStateTest(unittest.TestCase):
         board[36, 7] = 1
         allowed = {(39, 7), (34, 7)}
         self.assertEqual(set(game.gameState.allowed_actions(board, (9, 8))), allowed)
+
+    def test_get_full_moves(self):
+        game = Game()
+        game.gameState.board[17, 3] = 1
+        game.gameState.board[20, 3] = 1
+        game.gameState.board[21, 4] = 1
+        game.gameState.current_position = (4,3)
+        self.assertEqual(len(game.gameState.get_full_moves()), 11)
+
+    def test_is_proper_move(self):
+        game = Game()
+        self.assertEqual(self.is_proper_move(game.gameState.board,(6,4), [(21, 4)]),True)
+        self.assertNotEqual(self.is_proper_move(game.gameState.board,(4,4), [(21, 4)]),True)
+        self.assertNotEqual(self.is_proper_move(game.gameState.board, (6, 4), [(21, 4), (22, 2)]), True)
+        self.assertNotEqual(self.is_proper_move(game.gameState.board, (6, 4), [(21, 4), (20, 3)]), True)
+        board2 = game.gameState.board.copy()
+        board2[21,4] = 1
+        self.assertEqual(self.is_proper_move(board2, (5, 4), [(20, 3)]), True)
+
+    def is_proper_move(self, board, current_point, move):
+        for line in move:
+            if board[line[0],line[1]]==1:
+                return False
+        if (BoardGui.get_positions(move[0][0],move[0][1])[0][0]!=current_point[0] or
+            BoardGui.get_positions(move[0][0], move[0][1])[0][1] != current_point[1]) and\
+                (BoardGui.get_positions(move[0][0], move[0][1])[1][0] != current_point[0] or
+                BoardGui.get_positions(move[0][0], move[0][1])[1][1] != current_point[1]):
+            return False
+        move_points = [BoardGui.get_positions(x,y) for x,y in move]
+        if move_points[0][0][0] == current_point[0] and move_points[0][0][1] == current_point[1]:
+            next_point = move_points[0][1]
+        else:
+            next_point = move_points[0][0]
+        for i in range(1,len(move_points)):
+            if move_points[i][0][0] == next_point[0] and move_points[i][0][1] == next_point[1]:
+                next_point = move_points[i][1]
+            elif move_points[i][1][0] == next_point[0] and move_points[i][1][1] == next_point[1]:
+                next_point = move_points[i][0]
+            else:
+                return False
+
+            allowable_moves = None
+            game = Game()
+            board_cp = board.copy()
+            current_point_cp = current_point
+            for line in move:
+                f = False
+                if allowable_moves is None:
+                    f = True
+                else:
+                    if len(allowable_moves) == 7:
+                        return False
+                    for allowable_move in allowable_moves:
+                        if line[0] == allowable_move[0] and line[1] == allowable_move[1]:
+                            f = True
+                if not f:
+                    return False
+                board_cp[line[0], line[1]] = 1
+                line_pos = BoardGui.get_positions(line[0], line[1])
+                if line_pos[0][0] == current_point_cp[0] and line_pos[0][1] == current_point_cp[1]:
+                    current_point_cp = line_pos[1]
+                else:
+                    current_point_cp = line_pos[0]
+                allowable_moves = game.gameState.allowed_actions(board_cp, current_point_cp)
+
+        return True
+
 

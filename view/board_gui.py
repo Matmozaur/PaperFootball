@@ -16,7 +16,7 @@ def turn_path(path):
 class BoardGui:
     def __init__(self):
         self.root = None
-        self.window = tk.Tk()
+        self.window = None
         self.board = None
         self.agent = None
         self.env = None
@@ -184,4 +184,27 @@ class BoardGui:
         self.board.canvas.pack(fill="both", expand=True)
         self.board.draw_lines(lines)
         self.window.mainloop()
-# BoardGui()
+
+    def test_board(self):
+        self.window = tk.Tk()
+        self.set_game_window()
+        self.env = Game()
+        self.board = Board(self.window)
+        self.board.draw_board()
+        self.board.color_current_point()
+        self.board.color_allowable_points()
+        self.board.canvas.pack(fill="both", expand=True)
+        self.env.gameState.board[17, 3] = 1
+        self.env.gameState.board[20, 3] = 1
+        self.env.gameState.board[21, 4] = 1
+        self.env.gameState.current_position = (4, 3)
+        # print([self.env.gameState.get_move(x,y) for x,y in [[(4,3),(5,3)],[(5,3),(5,4)],[(5,4),(6,4)]]])
+        print(self.env.gameState.get_move((6,4),(5,4)))
+        # print(self.env.gameState.get_full_moves())
+        self.board.draw_lines([self.get_positions(x,y) for x,y in [(21, 4), (20, 3)]])
+        # self.board.draw_lines([[(4,3),(5,3)],[(5,3),(5,4)],[(5,4),(6,4)]])
+        self.window.mainloop()
+
+#
+# b = BoardGui()
+# b.test_board()
