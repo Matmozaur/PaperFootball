@@ -4,13 +4,28 @@ from controller import config
 
 
 class GameState:
+    """
+    Class responsible for logic side of the game.
+    Positions are tuples (x,y) where x is integer from 0 to 12 and y from 0 to 8, they indicates points on the field.
+    Lines are tuples (x,y) where x is integer from 0 to 48 and y from 0 to 8, they indicates lines on the field.
+    Lines differs regarding to x%4, 0:_ 1: | 2: \  3: /
+    """
     def __init__(self, board, player_turn, current_position):
+        """
+        @param board: current state of game field
+        @param player_turn: current player (-1, 1)
+        @param current_position: current position of the ball
+        """
         self.board = board
         self.playerTurn = player_turn
         self.current_position = current_position
 
     @staticmethod
     def turn_board(board):
+        """
+        @param board: state of game field
+        @return: state of game field from the other player's view
+        """
         board2 = np.zeros((48, 8), dtype=int)
         board2[1::4, 0] = 1
         board2[:5, :] = 1
@@ -51,6 +66,11 @@ class GameState:
         return board2
 
     def allowed_actions(self, tmp_board=None, tmp_current_position=None):
+        """
+        @param tmp_board: state of game field
+        @param tmp_current_position: starting position for a move
+        @return: all posible lines we can put on the field in that partial move
+        """
         if tmp_board is not None and tmp_current_position is not None:
             neighbours = self.get_neighbours(tmp_current_position)
             allowed = [self.get_move(tmp_current_position, x) for x in neighbours]
@@ -59,33 +79,31 @@ class GameState:
             neighbours = self.get_neighbours(self.current_position)
             allowed = [self.get_move(self.current_position, x) for x in neighbours]
             allowed = [x for x in allowed if self.board[x[0], x[1]] == 0]
-
         return allowed
 
-    def move(self, position):
-        a, b = self.get_move(self.current_position, position)
-        if (a, b) in self._allowed_actions():
-            self.board[a, b] = 1
-            self.current_position = position
-        else:
-            print('Error, wrong move')
+    # def move(self, position):
+    #     a, b = self.get_move(self.current_position, position)
+    #     if (a, b) in self._allowed_actions():
+    #         self.board[a, b] = 1
+    #         self.current_position = position
+    #     else:
+    #         print('Error, wrong move')
 
-    def check_for_end_game(self):
-        if len(self.allowed_actions()) == 0:
-            return -1
-        if self.current_position[0] == 12:
-            return -1
-        if self.current_position[0] == 0:
-            return 1
-        return 0
-
-    def check_for_change_player(self):
-        if len(self.allowed_actions()) < 7:
-            return True
-        return False
+    # def check_for_end_game(self):
+    #     if len(self.allowed_actions()) == 0:
+    #         return -1
+    #     if self.current_position[0] == 12:
+    #         return -1
+    #     if self.current_position[0] == 0:
+    #         return 1
+    #     return 0
 
     @staticmethod
     def get_neighbours(position):
+        """
+        @param position: given position on the board
+        @return: all points to which we can possible move
+        """
         neighbours = [(position[0] - 1, position[1] - 1), (position[0] - 1, position[1]),
                       (position[0], position[1] - 1),
                       (position[0] + 1, position[1] + 1), (position[0] + 1, position[1]),
@@ -107,6 +125,11 @@ class GameState:
 
     @staticmethod
     def get_move(position1, position2):
+        """
+        @param position1: point before move
+        @param position2: point after move
+        @return: line between points
+        """
         x = min(position1[1], position2[1])
         if position1[1] == position2[1]:
             if position1[0] > position2[0]:
@@ -130,6 +153,11 @@ class GameState:
 
     @staticmethod
     def get_positions(y, x):
+        """
+        @param y: y coordinate of line
+        @param x: x coordinate of line
+        @return: points connected by this line
+        """
         position1 = [0, 0]
         position2 = [0, 0]
         position1[1] = x
@@ -150,14 +178,6 @@ class GameState:
             position1[0] = int(y / 4) + 1
             position2[0] = int(y / 4)
         return tuple(position1), tuple(position2)
-
-    def get_all_lines(self):
-        lines = []
-        for i in range(48):
-            for j in range(8):
-                if self.board[i, j] == 1:
-                    lines.append(self.get_positions(j, i))
-        return lines
 
     def get_full_moves(self):
         full_moves = []

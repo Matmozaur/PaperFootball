@@ -15,20 +15,21 @@ def turn_path(path):
 
 class BoardGui:
     def __init__(self):
-        self.root = tk.Tk()
+        self.root = None
         self.window = tk.Tk()
         self.board = None
         self.agent = None
         self.env = None
         self.agent1 = None
         self.agent2 = None
-
+        self.bot = None
         # player1_file = open("temp_fw_trained", "rb")
         # player2_file = open("temp_fw_trained", "rb")
         # self.player1 = pickle.load(player1_file)
         # self.player2 = pickle.load(player2_file)
 
-
+    def start(self):
+        self.root = tk.Tk()
         file = open('../controller/temp_fw_trained', 'rb')
         self.bot = pickle.load(file)
         # self.bot = Agent('dsdas', model=ForwardModel())
@@ -171,5 +172,16 @@ class BoardGui:
                     lines.append(BoardGui.get_positions(i, j))
         return lines
 
-
-BoardGui()
+    def draw_board(self, board):
+        lines = self.get_all_lines(board)
+        self.set_game_window()
+        self.agent = self.bot
+        self.env = Game()
+        self.board = Board(self.window)
+        self.board.draw_board()
+        self.board.color_current_point()
+        self.board.color_allowable_points()
+        self.board.canvas.pack(fill="both", expand=True)
+        self.board.draw_lines(lines)
+        self.window.mainloop()
+# BoardGui()
