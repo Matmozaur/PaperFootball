@@ -1,5 +1,5 @@
 from controller.playing import play_valid
-from model.game import empty_board
+from model.game import empty_board, Game
 from model.ml_module.agent import Agent
 from model.ml_module.dummy_models import *
 import pickle
@@ -28,6 +28,27 @@ Playing matches between 2 bots
 Visualising board
 """
 board = empty_board()
-board[44, 3] = 1
+board[26, 4] = 1
+board[30, 5] = 1
+board[33, 6] = 1
+board[38, 6] = 1
+board[37, 7] = 1
+board[36, 7] = 1
+board[39, 7] = 1
+board[34, 7] = 1
 boardGUI = BoardGui()
 boardGUI.draw_board(board)
+
+
+
+
+# game = Game()
+# board = game.gameState.board.copy()
+# board[26, 4] = 1
+# board[30, 5] = 1
+# board[33, 6] = 1
+# board[38, 6] = 1
+# board[37, 7] = 1
+# board[36, 7] = 1
+# allowed = {(39, 7), (34, 7)}
+# game.gameState.allowed_actions(board, (9, 8))
