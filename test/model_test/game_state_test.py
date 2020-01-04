@@ -73,6 +73,7 @@ class GameStateTest(unittest.TestCase):
         self.assertEqual(game.gameState.get_positions(43, 3), positions)
 
     def test_allowed_actions_start(self):
+        pass
         # game = Game()
         # board = np.zeros((48, 8), dtype=int)
         # board[:48, :8] = 1
@@ -80,6 +81,7 @@ class GameStateTest(unittest.TestCase):
         # self.assertEqual(game.gameState.turn_board(board).tolist(), board.tolist())
 
     def test_allowed_actions_after_by_corner(self):
+        pass
         # game = Game()
         # board = game.gameState.board.copy()
         # game.gameState.board[18, 5] = 1
@@ -89,6 +91,7 @@ class GameStateTest(unittest.TestCase):
         # self.assertEqual(game.gameState.turn_board(game.gameState.board).tolist(), board.tolist())
 
     def test_allowed_actions_gate(self):
+        pass
         # game = Game()
         # board = game.gameState.board.copy()
         # game.gameState.board[4, 0] = 1
