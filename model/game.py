@@ -1,6 +1,7 @@
 import numpy as np
 
 from model.game_state import GameState
+from model.game_state_utils import turn_board
 
 
 def empty_board():
@@ -53,9 +54,9 @@ class Game:
         currentBoard = state.board
         currentAV = actionValues
 
-        currentBoard = self.gameState.turn_board(currentBoard)
+        currentBoard = turn_board(currentBoard)
 
-        currentAV = self.gameState.turn_board(currentAV)
+        currentAV = turn_board(currentAV)
 
         identities.append((GameState(currentBoard, state.playerTurn), currentAV))
 
@@ -78,5 +79,5 @@ class Game:
     def change_player(self):
         self.currentPlayer = -self.currentPlayer
         self.gameState.playerTurn = -self.gameState.playerTurn
-        self.gameState.board = self.gameState.turn_board(self.gameState.board)
+        self.gameState.board = turn_board(self.gameState.board)
         self.gameState.current_position = (12 - self.gameState.current_position[0], 8 - self.gameState.current_position[1])

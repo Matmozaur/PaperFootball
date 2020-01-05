@@ -104,6 +104,7 @@
 import random
 import sys
 from controller import config
+from controller.logger import log
 from model.game import Game
 
 
@@ -119,7 +120,7 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
             p1, p2 = p2, p1
         turn = 0
         while done == 0:
-            move = players[env.currentPlayer].get_move(env, turn, random_moves)
+            move = get_move(env, turn, random_moves)
             if move is not None:
                 if len(move) > 0:
                     # To be changed 1!
@@ -142,7 +143,7 @@ def play_valid(p1, p2, episodes, random_moves=0):
     players = {1: p1, -1: p2}
     scores = {p1.name: 0, p2.name: 0, 'starting_player': 0, 'non-starting_player': 0, }
     for e in range(int(episodes / 2)):
-        print('First half, game ',e)
+        log('First half, game ',e)
         env.reset()
         env.currentPlayer = 1
         done, result = 0, 0
@@ -161,13 +162,14 @@ def play_valid(p1, p2, episodes, random_moves=0):
     scores['starting_player'] = scores[p1.name] - scores[p2.name]
     scores['non-starting_player'] = int(episodes / 2) - scores[p1.name] + scores[p2.name]
     for e in range(int(episodes / 2)):
-        print('Secound half, game ',e)
+        log('Secound half, game ',e)
         env.reset()
         env.currentPlayer = -1
         done, result = 0, 0
         turn = 0
         while done == 0:
             move = players[env.currentPlayer].get_move(env, turn, random_moves)
+            # print(move[0],'      ',move[1])
             done, result = env.make_move(move)
             if done == 1:
                 scores[players[env.currentPlayer].name] += max(0, result)

@@ -6,7 +6,10 @@ CPUCT = 1
 EPSILON = 0.2
 ALPHA = 0.8
 
-max_t = 1500
+max_moves =1000
+max_final_moves = 30
+max_checked_moves = 200
+
 
 BATCH_SIZE = 128
 EPOCHS = 1
@@ -28,3 +31,5 @@ HIDDEN_CNN_LAYERS = [
 
 EVAL_EPISODES = 10
 SCORING_THRESHOLD = 1.1
+
+LOG = True

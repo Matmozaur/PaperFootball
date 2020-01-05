@@ -3,6 +3,9 @@ import pickle
 from _tkinter import TclError
 from tkinter import Button
 import tkinter as tk
+
+# from model.game_state_utils import get_move
+from model.game_state_utils import get_move
 from model.ml_module.dummy_models import RandomModel, ForwardModel, BackwardModel
 from view.board import Board
 from model.ml_module.agent import Agent
@@ -55,7 +58,7 @@ class BoardGui:
 
     def add_line_to_move(self, point):
         # print(point)
-        self.env.make_move([[self.env.gameState.get_move(point, self.board.current_point)], point, 0])
+        self.env.make_move([[get_move(point, self.board.current_point)], point, 0])
 
         # print(self.env.gameState.get_move((2,6), (1,5)))
 
@@ -184,4 +187,4 @@ class BoardGui:
         self.board.canvas.pack(fill="both", expand=True)
         self.board.draw_lines(lines)
         self.window.mainloop()
-# BoardGui()
+

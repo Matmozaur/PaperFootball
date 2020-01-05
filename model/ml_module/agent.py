@@ -138,9 +138,12 @@
 # #
 import copy
 import random
+import time
 
 from controller import config
 import numpy as np
+
+from controller.logger import log
 
 
 class Agent:
@@ -164,11 +167,8 @@ class Agent:
 
     def get_move(self, env, turn=1, random_moves=0):
         best_move, best_score = None, -100
-        # print('get moves')
         all_moves = env.get_all_allowed_moves()
-        print(len(all_moves))
-        if len(all_moves) > 1000:
-            all_moves = random.sample(all_moves, 1000)
+        start = time.time()
         for move in all_moves:
             sc = self.score_move(move, env, turn, random_moves)
             # print(sc)
@@ -179,7 +179,9 @@ class Agent:
                 best_move = move
                 # if sc == 100:
                 #     return best_move
-        print(best_score)
+        end = time.time()
+        log('elapsed seconds evaluating:', end - start)
+        log('score', best_score)
         return best_move
 
     def score_move(self, move, env, turn, random_moves):
@@ -193,5 +195,4 @@ class Agent:
         else:
             if turn < random_moves:
                 return random.uniform(0, 1)
-            # print('Predictin: ', self.model.predict(env_test.gameState.board, env_test.gameState.current_position))
             return self.model.predict(self.model.convertToModelInput(env_test.gameState.board), env_test.gameState.current_position)
