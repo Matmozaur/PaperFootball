@@ -64,7 +64,7 @@ class GameState:
 
     def get_full_moves(self, max_moves=config.max_moves, max_final_moves=config.max_final_moves,
                        max_checked_moves=config.max_checked_moves):
-            # start = time.time()
+            start = time.time()
             # file = open('board', 'wb')
             # pickle.dump(self.board, file)
             full_moves = []
@@ -120,7 +120,7 @@ class GameState:
                     return
                 else:
                     actions = self.allowed_actions(board, tmp_current_pos)
-                    # shuffle(actions)
+                    shuffle(actions)
                     for neighbour in actions:
                         go_through_neighbour(self, board, path, neighbour, tmp_current_pos, full_moves, max_moves, full_moves_final)
 
@@ -146,10 +146,10 @@ class GameState:
                     full_moves_final.append(m)
 
             get_full_moves_utils(self, [], self.board, self.current_position, full_moves)
-            # end = time.time()
-            # log('elapsed seconds prepare moves:', end - start)
+            end = time.time()
+            log('elapsed seconds prepare moves:', end - start)
 
-            # start = time.time()
+            start = time.time()
             full_moves_final=[]
             Parallel(n_jobs=num_cores, backend="threading")(delayed(check_move)(m, full_moves_final) for m in full_moves)
 
@@ -169,9 +169,9 @@ class GameState:
             #         full_moves_final.append(m)
             #         if len(full_moves_final) >= max_final_moves:
             #             break
-            # end = time.time()
-            # log('elapsed seconds checking:', end - start)
-            # log('final_moves', len(full_moves_final))
+            end = time.time()
+            log('elapsed seconds checking:', end - start)
+            log('final_moves', len(full_moves_final))
             return full_moves_final
 
 
