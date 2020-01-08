@@ -5,6 +5,9 @@ from model.game_state_utils import turn_board
 
 
 def empty_board():
+    """
+    @return: empty board
+    """
     board = np.zeros((48, 8), dtype=int)
 
     # # board[1::4, 0] = 2
@@ -28,6 +31,9 @@ def empty_board():
 
 
 class Game:
+    """
+    Interface for game state
+    """
 
     def __init__(self):
         self.currentPlayer = 1
@@ -40,35 +46,6 @@ class Game:
         self.gameState = GameState(empty_board(), 1, (6, 4))
         self.currentPlayer = 1
         return self.gameState
-
-
-    # def make_move(self, move):
-    #     self.gameState.move(move)
-
-
-# from article
-
-    def identities(self, state, actionValues):
-        identities = [(state, actionValues)]
-
-        currentBoard = state.board
-        currentAV = actionValues
-
-        currentBoard = turn_board(currentBoard)
-
-        currentAV = turn_board(currentAV)
-
-        identities.append((GameState(currentBoard, state.playerTurn), currentAV))
-
-        return identities
-
-
-    # def step(self, action):
-    #     next_state, value, done = self.gameState.takeAction(action)
-    #     self.gameState = next_state
-    #     self.currentPlayer = -self.currentPlayer
-    #     info = None
-    #     return ((next_state, value, done, info))
 
     def get_all_allowed_moves(self):
         return self.gameState.get_full_moves()

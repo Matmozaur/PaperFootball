@@ -33,7 +33,7 @@ class BoardGui:
 
     def start(self):
         self.root = tk.Tk()
-        file = open('../controller/temp_fw_trained', 'rb')
+        file = open('../controller/temp', 'rb')
         self.bot = pickle.load(file)
         # self.bot = Agent('dsdas', model=ForwardModel())
 

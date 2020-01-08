@@ -64,6 +64,12 @@ class GameState:
 
     def get_full_moves(self, max_moves=config.max_moves, max_final_moves=config.max_final_moves,
                        max_checked_moves=config.max_checked_moves):
+            """
+            @param max_moves: maximal number of moves which will be checked
+            @param max_final_moves: maximal number of returned moves
+            @param max_checked_moves: maximal number of moves checked while analysing move
+            @return: list of possible moves which won't lose game
+            """
             start = time.time()
             # file = open('board', 'wb')
             # pickle.dump(self.board, file)
@@ -102,6 +108,8 @@ class GameState:
 
             def get_full_moves_utils(self, path, board, tmp_current_pos, full_moves, c_p=self.current_position, max_moves=max_moves,
                                      full_moves_final=[]):
+                if (time.time() - start) >= config.MAX_TIME_CHECKING:
+                    return
                 if len(full_moves) > max_moves:
                     return
                 if len(full_moves_final) > max_final_moves:
@@ -126,6 +134,8 @@ class GameState:
 
             def check_move(m, full_moves_final):
                 # log(len(full_moves_final))
+                if (time.time() - start) >= config.MAX_TIME_CHECKING:
+                    return
                 if len(full_moves_final) >= max_final_moves:
                     return
                 if len(full_moves_final) >= 1:
@@ -150,7 +160,8 @@ class GameState:
             log('elapsed seconds prepare moves:', end - start)
 
             start = time.time()
-            full_moves_final=[]
+            full_moves_final = []
+            shuffle(full_moves)
             Parallel(n_jobs=num_cores, backend="threading")(delayed(check_move)(m, full_moves_final) for m in full_moves)
 
             # for m in full_moves:

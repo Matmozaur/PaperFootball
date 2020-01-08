@@ -6,6 +6,9 @@ from controller import config
 
 
 class Memory:
+    """
+    container for played matches
+    """
     def __init__(self, size):
         self.MEMORY_SIZE = size
         self.ltmemory = deque(maxlen=2*size)
@@ -14,11 +17,16 @@ class Memory:
 
     def clear_ltmemory(self):
         self.iter += 1
-        # file = open('games'+str(self.iter), 'wb')
-        # pickle.dump(self.ltmemory, file)
         self.ltmemory.clear()
 
     def append_stmemory(self, player, state, current_position=None, result=None):
+        """
+        saves move to short-term memory
+        @param player: current player
+        @param state: state after current player move
+        @param current_position: current position  of the ball (after move)
+        @param result: result of the game
+        """
         self.stmemory.append({
             'player': player
             , 'state': state
@@ -27,6 +35,13 @@ class Memory:
         })
 
     def commit_stmemory(self, env, result):
+        """
+        saves match to long-term memory
+        @param player: current player
+        @param state: state after current player move
+        @param current_position: current position  of the ball (after move)
+        @param result: result of the game
+        """
         self.stmemory.append({
             'player': env.currentPlayer
             , 'state': env.gameState.board
@@ -44,8 +59,3 @@ class Memory:
             self.ltmemory.append(i)
         self.stmemory.clear()
 
-    # def commit_ltmemory(self):
-    #     for i in self.stmemory:
-    #         self.ltmemory.append(i)
-    #     self.clear_stmemory()
-    #

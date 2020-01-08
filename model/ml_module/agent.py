@@ -152,6 +152,9 @@ class Agent:
         self.model = model
 
     def retrain(self, memory, config=config):
+        """
+        retrain model basing on played games
+        """
         for i in range(config.TRAINING_LOOPS):
             # print([row['state'] for row in memory.ltmemory][0])
             # [self.model.convertToModelInput(row['state']) for row in memory.ltmemory]
@@ -166,6 +169,12 @@ class Agent:
     #             self.train_policy_loss.append(round(fit.history['policy_head_loss'][config.EPOCHS - 1], 4))
 
     def get_move(self, env, turn=1, random_moves=0):
+        """
+        @param env: current game state
+        @param turn: flag
+        @param random_moves: number of moves before agent starts to play deterministic
+        @return:
+        """
         best_move, best_score = None, -100
         all_moves = env.get_all_allowed_moves()
         start = time.time()
@@ -185,6 +194,13 @@ class Agent:
         return best_move
 
     def score_move(self, move, env, turn, random_moves):
+        """
+        @param move: proposed move
+        @param env: current game state
+        @param turn: flag
+        @param random_moves: configuration parametr
+        @return: score of the move
+        """
         env_test = copy.deepcopy(env)
         done, result = env_test.make_move(move)
         if done == 1:

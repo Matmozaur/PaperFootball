@@ -109,6 +109,14 @@ from model.game import Game
 
 
 def play_training(p1, p2, memory, episodes, random_moves=0):
+    """
+    plays matches between players and saves results
+    @param p1: player 1
+    @param p2: player 2
+    @param memory: memory object for game state saving
+    @param episodes: number of simulated matches
+    @param random_moves: number of random moves at the beginning of the match
+    """
     env = Game()
     players = {1: p1, -1: p2}
     for e in range(episodes):
@@ -139,6 +147,14 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
 
 
 def play_valid(p1, p2, episodes, random_moves=0):
+    """
+    plays matches between players to analyse results
+    @param p1: player 1
+    @param p2: player 2
+    @param episodes: number of games
+    @param random_moves: number of random moves at the beginning of the match
+    @return: dictionary with games results
+    """
     env = Game()
     players = {1: p1, -1: p2}
     scores = {p1.name: 0, p2.name: 0, 'starting_player': 0, 'non-starting_player': 0, }
