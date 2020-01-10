@@ -13,8 +13,8 @@ MAX_TIME_CHECKING = 5
 
 BATCH_SIZE = 64
 EPOCHS = 3
-REG_CONST = 0.005
-LEARNING_RATE = 0.1
+REG_CONST = 0.05
+LEARNING_RATE = 0.05
 MOMENTUM = 0.1
 TRAINING_LOOPS = 1
 
@@ -22,8 +22,8 @@ INPUT_SHAPE = (48,8,1)
 
 HIDDEN_CNN_LAYERS = [
     {'filters': 384, 'kernel_size': (12, 3)}
-    # , {'filters': 300, 'kernel_size': (8, 2)}
-    # , {'filters': 300, 'kernel_size': (12, 3)}
+    , {'filters': 384, 'kernel_size': (8, 2)}
+    # , {'filters': 384, 'kernel_size': (12, 3)}
     # , {'filters': 192, 'kernel_size': (6, 3)}
     # , {'filters': 86, 'kernel_size': (4, 4)}
     # , {'filters': 300, 'kernel_size': (12, 3)}

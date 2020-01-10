@@ -175,9 +175,10 @@ class Residual_NN_simple(Gen_Model):
         vh = self.value_head(x)
 
         model = Model(inputs=[main_input], output=vh)
-        model.compile(loss={'value_head': 'mean_squared_error'},
+        model.compile(loss={'value_head': 'binary_crossentropy'},
                       optimizer=SGD(lr=self.learning_rate, momentum=config.MOMENTUM),
-                      loss_weights={'value_head': 0.5}
+                      loss_weights={'value_head': 0.5},
+                      metrics=['accuracy']
                       )
 
         return model
