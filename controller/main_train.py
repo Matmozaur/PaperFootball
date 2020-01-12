@@ -50,7 +50,7 @@ current_player = Agent('current_player', current_nn)
 best_player = Agent('best_player',  best_nn)
 # print('a')
 play_training(best_player, best_player, memory, config.EPISODES, config.TURNS_UNTIL_DET)
-file = open('memory2', 'wb')
+file = open('memory', 'wb')
 pickle.dump(memory, file)
 
 

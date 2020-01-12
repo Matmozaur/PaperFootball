@@ -147,9 +147,13 @@ from controller.logger import log
 
 
 class Agent:
-    def __init__(self, name, model):
+    def __init__(self, name, model, mode='deep check'):
         self.name = name
         self.model = model
+        self.mode = mode
+        self.modes = {
+            'deep check': self.get_move_deep_check
+        }
 
     def retrain(self, memory, config=config):
         """
@@ -169,6 +173,9 @@ class Agent:
     #             self.train_policy_loss.append(round(fit.history['policy_head_loss'][config.EPOCHS - 1], 4))
 
     def get_move(self, env, turn=1, random_moves=0):
+        return self.modes[self.mode](env, turn, random_moves)
+
+    def get_move_deep_check(self, env, turn=1, random_moves=0):
         """
         @param env: current game state
         @param turn: flag
