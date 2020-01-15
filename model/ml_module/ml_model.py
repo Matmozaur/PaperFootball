@@ -197,8 +197,8 @@ class Residual_NN_simple(Gen_Model):
 
 
     def predict(self, x, pos=None):
-        # input = self.convertToModelInput(x)
-        return self.model.predict(x)
+        input = self.convertToModelInput(x)
+        return self.model.predict(input)
 # class Residual_CNN(Gen_Model):
 #     def __init__(self, reg_const, learning_rate, input_dim, output_dim, hidden_layers):
 #         Gen_Model.__init__(self, reg_const, learning_rate, input_dim, output_dim)

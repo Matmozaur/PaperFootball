@@ -152,7 +152,10 @@ class Agent:
         self.model = model
         self.mode = mode
         self.modes = {
-            'deep check': self.get_move_deep_check
+            'simple': self.get_move_deep_check,
+            'deep check': self.get_move_deep_check,
+            'mcts': self.get_move_deep_check,
+            'simple mcts': self.get_move_deep_check
         }
 
     def retrain(self, memory, config=config):
@@ -164,7 +167,7 @@ class Agent:
             # [self.model.convertToModelInput(row['state']) for row in memory.ltmemory]
             training_states = np.array([self.model.convertToModelInput_fit(row['state']) for row in memory.ltmemory])
             training_targets = {'value_head': np.array([row['result'] for row in memory.ltmemory])}
-            print(training_states.shape)
+            log(training_states.shape)
             self.model.fit(training_states, training_targets, epochs=config.EPOCHS, verbose=1, validation_split=0.1,
                            batch_size=config.BATCH_SIZE)
 
@@ -183,7 +186,32 @@ class Agent:
         @return:
         """
         best_move, best_score = None, -100
-        all_moves = env.get_all_allowed_moves()
+        all_moves = env.get_full_moves_deep()
+        start = time.time()
+        for move in all_moves:
+            sc = self.score_move(move, env, turn, random_moves)
+            # print(sc)
+            if move[2] == 1:
+                return move
+            if sc > best_score:
+                best_score = sc
+                best_move = move
+                # if sc == 100:
+                #     return best_move
+        end = time.time()
+        log('elapsed seconds evaluating:', end - start)
+        log('score', best_score)
+        return best_move
+
+    def get_move_simple(self, env, turn=1, random_moves=0):
+        """
+        @param env: current game state
+        @param turn: flag
+        @param random_moves: number of moves before agent starts to play deterministic
+        @return:
+        """
+        best_move, best_score = None, -100
+        all_moves = env.get_full_moves_simple()
         start = time.time()
         for move in all_moves:
             sc = self.score_move(move, env, turn, random_moves)
@@ -218,4 +246,4 @@ class Agent:
         else:
             if turn < random_moves:
                 return random.uniform(0, 1)
-            return self.model.predict(self.model.convertToModelInput(env_test.gameState.board), env_test.gameState.current_position)
+            return self.model.predict(env_test.gameState.board, env_test.gameState.current_position)

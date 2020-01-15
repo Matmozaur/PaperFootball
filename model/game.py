@@ -48,7 +48,7 @@ class Game:
         return self.gameState
 
     def get_all_allowed_moves(self):
-        return self.gameState.get_full_moves()
+        return self.gameState.get_full_moves_deep()
 
     def make_move(self, move):
         return self.gameState.make_move(move)
