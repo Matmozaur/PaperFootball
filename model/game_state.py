@@ -40,6 +40,11 @@ class GameState:
             allowed = [get_move(self.current_position, x) for x in neighbours]
             allowed = [x for x in allowed if self.board[x[0], x[1]] == 0]
         return allowed
+    aasdasd
+    asd
+    as
+    da
+    sdasdasdasd
 
     def make_move(self, move):
         """
