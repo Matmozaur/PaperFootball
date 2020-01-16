@@ -41,8 +41,6 @@ class GameState:
             allowed = [x for x in allowed if self.board[x[0], x[1]] == 0]
         return allowed
 
-sdfsdf
-sdfsdf
 
     def make_move(self, move):
         """

@@ -183,8 +183,6 @@ class Residual_NN_simple(Gen_Model):
 
         return model
 
-asdadsa
-adads
 
     def convertToModelInput(self, state):
         # inputToModel = state.binary  # np.append(state.binary, [(state.playerTurn + 1)/2] * self.input_dim[1] * self.input_dim[2])
