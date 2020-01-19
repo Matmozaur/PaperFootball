@@ -5,6 +5,8 @@ import webbrowser
 from _tkinter import TclError
 from tkinter import Button, BOTTOM, BOTH
 import tkinter as tk
+
+from model import game_state_utils
 from model.ml_module.dummy_models import RandomModel, ForwardModel, BackwardModel
 from view.board import Board
 from model.ml_module.agent import Agent
@@ -31,19 +33,19 @@ class BoardGui:
         self.player1 = None
         self.player2 = None
 
-    def start(self):
-        # player1_file = open("temp_fw_trained", "rb")
-        # player2_file = open("temp_fw_trained", "rb")
-        # self.player1 = pickle.load(player1_file)
-        # self.player2 = pickle.load(player2_file)
-
-        self.root = tk.Tk()
-        # file = open('../controller/temp_fw_trained', 'rb')
-        # self.bot = pickle.load(file)
-
-        self.bot = Agent('dsdas', model=RandomModel())
-
-        # self.set_panel()
+    # def start(self):
+    #     # player1_file = open("temp_fw_trained", "rb")
+    #     # player2_file = open("temp_fw_trained", "rb")
+    #     # self.player1 = pickle.load(player1_file)
+    #     # self.player2 = pickle.load(player2_file)
+    #
+    #     self.root = tk.Tk()
+    #     # file = open('../controller/temp_fw_trained', 'rb')
+    #     # self.bot = pickle.load(file)
+    #     print("sdasdadas")
+    #     self.bot = Agent('dsdas', model=RandomModel())
+    #     print("bot", self.bot)
+    #     # self.set_panel()
 
     def get_move(self, bot=None):
         if bot is not None:
@@ -64,7 +66,7 @@ class BoardGui:
         self.env.change_player()
     def add_line_to_move(self, point):
         # print(point)
-        self.env.make_move([[self.env.gameState.get_move(point, self.board.current_point)], point, 0])
+        self.env.make_move([[game_state_utils.get_move(point, self.board.current_point)], point, 0])
 
         # print(self.env.gameState.get_move((2,6), (1,5)))
 
@@ -220,8 +222,9 @@ class NewGameBU(tk.Frame):
 
         tk.Frame.__init__(self, parent)
         self.boardGui = BoardGui()
-        self.boardGui.file = open('../controller/temp_fw_trained', 'rb')
-        self.boardGui.bot = pickle.load(self.boardGui.file)
+        # self.boardGui.file = open('../controller/temp_fw_trained', 'rb')
+        # self.boardGui.bot = pickle.load(self.boardGui.file)
+        self.boardGui.bot = Agent('dsdas', model=RandomModel(), search_mode="simple")
         self.boardGui.agent = self.boardGui.bot
         self.boardGui.env = Game()
         self.boardGui.board = Board(self)

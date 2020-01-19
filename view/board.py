@@ -161,8 +161,8 @@ class Board:
         self.color_current_point()
         self.player = player
 
-
-        if player==1 and allowable_points is None:
+        print(player,tmp_current_pos)
+        if (player==1 and allowable_points is None) or (player == 1 and tmp_current_pos[0] == 0 and tmp_current_pos[1] == 4):
             self.label_win_lose = tk.Label(self.canvas, text="You won!!!", font=LARGE_FONT, width=20)
             self.label_win_lose.pack(pady=220, padx=0)
         if (player == -1 and (len(allowable_points) == 0 or (tmp_current_pos[0] == 12 and tmp_current_pos[1] == 4))) or (player==1 and len(allowable_points)==0):
