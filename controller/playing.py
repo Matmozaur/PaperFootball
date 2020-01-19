@@ -104,7 +104,7 @@
 import random
 import sys
 from controller import config
-from controller.logger import log
+from controller.logger import log, log_important
 from model.game import Game
 
 
@@ -159,7 +159,7 @@ def play_valid(p1, p2, episodes, random_moves=0):
     players = {1: p1, -1: p2}
     scores = {p1.name: 0, p2.name: 0, 'starting_player': 0, 'non-starting_player': 0, }
     for e in range(int(episodes / 2)):
-        log('First half, game ',e)
+        log_important('First half, game ',e)
         env.reset()
         env.currentPlayer = 1
         done, result = 0, 0
@@ -175,7 +175,7 @@ def play_valid(p1, p2, episodes, random_moves=0):
     scores['starting_player'] = scores[p1.name] - scores[p2.name]
     scores['non-starting_player'] = int(episodes / 2) - scores[p1.name] + scores[p2.name]
     for e in range(int(episodes / 2)):
-        log('Secound half, game ',e)
+        log_important('Secound half, game ',e)
         env.reset()
         env.currentPlayer = -1
         done, result = 0, 0
@@ -192,3 +192,4 @@ def play_valid(p1, p2, episodes, random_moves=0):
     scores['starting_player'] += scores[p2.name]
     scores['non-starting_player'] += int(episodes / 2) - scores[p2.name]
     return scores
+

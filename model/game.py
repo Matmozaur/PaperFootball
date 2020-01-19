@@ -47,8 +47,13 @@ class Game:
         self.currentPlayer = 1
         return self.gameState
 
-    def get_all_allowed_moves(self):
-        return self.gameState.get_full_moves_deep()
+    def get_all_allowed_moves(self, type='deep', params=None):
+        if type == 'deep':
+            return self.gameState.get_full_moves_deep()
+        if type == 'simple':
+            return self.gameState.get_full_moves_simple()
+        if type == 'random':
+            return self.gameState.get_random_move()
 
     def make_move(self, move):
         return self.gameState.make_move(move)
