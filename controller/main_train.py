@@ -24,7 +24,7 @@ def main_train():
         play_training(best_player, best_player, memory, config.EPISODES, config.TURNS_UNTIL_DET)
         if len(memory.ltmemory) >= config.MEMORY_SIZE:
             current_player.retrain(memory)
-            # memory.clear_ltmemory()
+            # memory_random_1.clear_ltmemory()
             scores = play_valid(current_player, best_player, config.EVAL_EPISODES, random_moves=2)
             print(scores)
             if ((scores['current_player']+1)/(scores['best_player']+1)) > config.SCORING_THRESHOLD:
@@ -50,7 +50,7 @@ current_player = Agent('current_player', current_nn)
 best_player = Agent('best_player',  best_nn)
 # print('a')
 play_training(best_player, best_player, memory, config.EPISODES, config.TURNS_UNTIL_DET)
-file = open('memory', 'wb')
+file = open('../resources/memory_random_1', 'wb')
 pickle.dump(memory, file)
 
 
@@ -65,7 +65,7 @@ pickle.dump(memory, file)
 # current_nn = Residual_NN_simple(config.REG_CONST, config.LEARNING_RATE, config.INPUT_SHAPE, config.HIDDEN_CNN_LAYERS)
 # best_nn = Residual_NN_simple(config.REG_CONST, config.LEARNING_RATE, config.INPUT_SHAPE, config.HIDDEN_CNN_LAYERS)
 # best_nn.model.set_weights(current_nn.model.get_weights())
-# memory = Memory(config.MEMORY_SIZE)
+# memory_random_1 = Memory(config.MEMORY_SIZE)
 # current_player = Agent('current_player', current_nn)
 # best_player = Agent('best_player',  best_nn)
 #
@@ -77,10 +77,10 @@ pickle.dump(memory, file)
 # while i < 120:
 #     i+=1
 #     print('Iteration ',i)
-#     play_training(best_player, best_player, memory, config.EPISODES, config.TURNS_UNTIL_DET)
-#     if len(memory.ltmemory) >= config.MEMORY_SIZE:
-#         current_player.retrain(memory)
-#         # memory.clear_ltmemory()
+#     play_training(best_player, best_player, memory_random_1, config.EPISODES, config.TURNS_UNTIL_DET)
+#     if len(memory_random_1.ltmemory) >= config.MEMORY_SIZE:
+#         current_player.retrain(memory_random_1)
+#         # memory_random_1.clear_ltmemory()
 #         scores = play_valid(current_player, best_player, config.EVAL_EPISODES, random_moves=2)
 #         print(scores)
 #         if ((scores['current_player']+1)/(scores['best_player']+1)) > config.SCORING_THRESHOLD:

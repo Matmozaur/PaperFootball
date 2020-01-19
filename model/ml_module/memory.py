@@ -21,7 +21,7 @@ class Memory:
 
     def append_stmemory(self, player, state, current_position=None, result=None):
         """
-        saves move to short-term memory
+        saves move to short-term memory_random_1
         @param player: current player
         @param state: state after current player move
         @param current_position: current position  of the ball (after move)
@@ -36,7 +36,7 @@ class Memory:
 
     def commit_stmemory(self, env, result):
         """
-        saves match to long-term memory
+        saves match to long-term memory_random_1
         @param player: current player
         @param state: state after current player move
         @param current_position: current position  of the ball (after move)

@@ -31,12 +31,12 @@
 #             player2_NN.model.set_weights(player2_network.get_weights())
 #         player2 = Agent('player2', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, player2_NN)
 #
-#     scores, memory, points, sp_scores = playMatches(player1, player2, EPISODES, logger, turns_until_tau0, None, goes_first)
+#     scores, memory_random_1, points, sp_scores = playMatches(player1, player2, EPISODES, logger, turns_until_tau0, None, goes_first)
 #
-#     return scores, memory, points, sp_scores
+#     return scores, memory_random_1, points, sp_scores
 #
 #
-# def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = None, goes_first = 0):
+# def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory_random_1 = None, goes_first = 0):
 #     env = Game()
 #     scores = {player1.name:0, "drawn": 0, player2.name:0}
 #     sp_scores = {'sp':0, "drawn": 0, 'nsp':0}
@@ -66,21 +66,21 @@
 #                 action, pi, MCTS_value, NN_value = players[state.playerTurn]['agent'].act(state, 1)
 #             else:
 #                 action, pi, MCTS_value, NN_value = players[state.playerTurn]['agent'].act(state, 0)
-#             if memory != None:
-#                 ####Commit the move to memory
-#                 memory.commit_stmemory(env.identities, state, pi)
+#             if memory_random_1 != None:
+#                 ####Commit the move to memory_random_1
+#                 memory_random_1.commit_stmemory(env.identities, state, pi)
 #             ### Do the action
 #             state, value, done, _ = env.step(action) #the value of the newState from the POV of the new playerTurn i.e. -1 if the previous player played a winning move
 #
 #             if done == 1:
-#                 if memory != None:
+#                 if memory_random_1 != None:
 #                     #### If the game is finished, assign the values correctly to the game moves
-#                     for move in memory.stmemory:
+#                     for move in memory_random_1.stmemory:
 #                         if move['playerTurn'] == state.playerTurn:
 #                             move['value'] = value
 #                         else:
 #                             move['value'] = -value
-#                     memory.commit_ltmemory()
+#                     memory_random_1.commit_ltmemory()
 #                 if value == 1:
 #                     scores[players[state.playerTurn]['name']] = scores[players[state.playerTurn]['name']] + 1
 #                     if state.playerTurn == 1:
@@ -100,7 +100,7 @@
 #                 pts = state.score
 #                 points[players[state.playerTurn]['name']].append(pts[0])
 #                 points[players[-state.playerTurn]['name']].append(pts[1])
-#     return scores, memory, points, sp_scores
+#     return scores, memory_random_1, points, sp_scores
 import random
 import sys
 from controller import config
@@ -113,7 +113,7 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
     plays matches between players and saves results
     @param p1: player 1
     @param p2: player 2
-    @param memory: memory object for game state saving
+    @param memory: memory_random_1 object for game state saving
     @param episodes: number of simulated matches
     @param random_moves: number of random moves at the beginning of the match
     """
@@ -121,7 +121,7 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
     players = {1: p1, -1: p2}
     for e in range(episodes):
         print('game', e)
-        # print(sys.getsizeof(memory.ltmemory))
+        # print(sys.getsizeof(memory_random_1.ltmemory))
         env.reset()
         done, result = 0, 0
         if random.randint(0, 1) > 0.5:
@@ -136,14 +136,14 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
                         memory.ltmemory.popleft()
                     if turn > 7:
                         memory.append_stmemory(env.currentPlayer, move[3], move[1])
-                # memory.append_stmemory(env.currentPlayer, move[3], move[1])
+                # memory_random_1.append_stmemory(env.currentPlayer, move[3], move[1])
                 # print(move[1],'      ',move[0])
             done, result = env.make_move(move)
             if done == 1:
                 memory.commit_stmemory(env, result)
             env.change_player()
             turn += 1
-    # return memory
+    # return memory_random_1
 
 
 def play_valid(p1, p2, episodes, random_moves=0):
@@ -166,13 +166,10 @@ def play_valid(p1, p2, episodes, random_moves=0):
         turn = 0
         while done == 0:
             move = players[env.currentPlayer].get_move(env, turn, random_moves)
-            # print(move[0],'      ',move[1])
             done, result = env.make_move(move)
-            # print(env.gameState.board)
             if done == 1:
                 scores[players[env.currentPlayer].name] += max(0, result)
                 scores[players[-env.currentPlayer].name] += max(0, -result)
-            # print('CHANGE PLAYER!!!')
             env.change_player()
             turn += 1
     scores['starting_player'] = scores[p1.name] - scores[p2.name]

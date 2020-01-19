@@ -163,8 +163,8 @@ class Agent:
         retrain model basing on played games
         """
         for i in range(config.TRAINING_LOOPS):
-            # print([row['state'] for row in memory.ltmemory][0])
-            # [self.model.convertToModelInput(row['state']) for row in memory.ltmemory]
+            # print([row['state'] for row in memory_random_1.ltmemory][0])
+            # [self.model.convertToModelInput(row['state']) for row in memory_random_1.ltmemory]
             training_states = np.array([self.model.convertToModelInput_fit(row['state']) for row in memory.ltmemory])
             training_targets = {'value_head': np.array([row['result'] for row in memory.ltmemory])}
             log(training_states.shape)
