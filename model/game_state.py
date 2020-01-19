@@ -73,9 +73,9 @@ class GameState:
         """
         if tmp_board is not None and tmp_current_position is not None:
             neighbours = self.get_neighbours(tmp_current_position)
-            print(neighbours)
+            # print(neighbours)
             allowed = [self.get_move(tmp_current_position, x) for x in neighbours]
-            print(allowed)
+            # print(allowed)
             allowed = [x for x in allowed if tmp_board[x[0], x[1]] == 0]
         else:
             neighbours = self.get_neighbours(self.current_position)
@@ -190,7 +190,7 @@ class GameState:
             # print(board, tmp_current_pos)
             local_moves = []
             get_full_moves_utils(self, [], board_temp, tmp_current_pos_turned, local_moves, safety=False, c_p=tmp_current_pos_turned)
-            print([(p[0], p[1], p[2]) for p in local_moves])
+            # print([(p[0], p[1], p[2]) for p in local_moves])
             if not local_moves:
                 return 1
             elif local_moves[0][2] == 1:
@@ -202,7 +202,7 @@ class GameState:
                 return
             if tmp_current_pos != c_p and len(self.allowed_actions(board, tmp_current_pos)) == 7:
                 if safety:
-                    print('checks move:', path)
+                    # print('checks move:', path)
                     checker = check_for_danger(board, tmp_current_pos)
                     if checker == -1:
                         return
