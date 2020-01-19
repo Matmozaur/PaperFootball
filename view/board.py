@@ -1,8 +1,11 @@
 import tkinter as tk
 from time import sleep
 
+LARGE_FONT = ("Verdana", 12)
 
 class Board:
+
+
     def __init__(self, window):
         self.window = window
         self.canvas = tk.Canvas(self.window)
@@ -16,6 +19,7 @@ class Board:
         self.player = -1
         self.lines = []
         self.last_point = (6, 4)
+
 
     # ----------------------------------------squares----------------------------
     def draw_board(self):
@@ -156,3 +160,11 @@ class Board:
 
         self.color_current_point()
         self.player = player
+
+
+        if player==1 and allowable_points is None:
+            self.label_win_lose = tk.Label(self.canvas, text="You won!!!", font=LARGE_FONT, width=20)
+            self.label_win_lose.pack(pady=220, padx=0)
+        if (player == -1 and (len(allowable_points) == 0 or (tmp_current_pos[0] == 12 and tmp_current_pos[1] == 4))) or (player==1 and len(allowable_points)==0):
+            self.label_win_lose = tk.Label(self.canvas, text="You lost!!!", font=LARGE_FONT, width=20)
+            self.label_win_lose.pack(pady=220, padx=0)

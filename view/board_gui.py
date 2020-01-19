@@ -38,9 +38,10 @@ class BoardGui:
         # self.player2 = pickle.load(player2_file)
 
         self.root = tk.Tk()
-        file = open('../controller/temp_fw_trained', 'rb')
-        self.bot = pickle.load(file)
-        # self.bot = Agent('dsdas', model=ForwardModel())
+        # file = open('../controller/temp_fw_trained', 'rb')
+        # self.bot = pickle.load(file)
+
+        self.bot = Agent('dsdas', model=RandomModel())
 
         # self.set_panel()
 
@@ -230,6 +231,12 @@ class NewGameBU(tk.Frame):
         self.boardGui.board.canvas.config(width=400, height=600)
         self.boardGui.board.canvas.bind('<Button>', self.boardGui.on_click)
         self.boardGui.board.canvas.pack(fill=BOTH, expand=True)
+
+
+
+
+
+
         # button1 = tk.Button(self, text="Restart Game",
         #                     command=lambda: controller.show_frame(NewGameBU))
         # button1.pack(side=BOTTOM)
