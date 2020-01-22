@@ -144,6 +144,7 @@ from controller import config
 import numpy as np
 
 from controller.logger import log
+from model.ml_module.mcts import get_move_mcts
 
 
 class Agent:
@@ -167,6 +168,8 @@ class Agent:
     def get_move(self, env, turn=1, random_moves=0):
         if self.eval_mode == 'model':
             return self.get_move_model(env, turn=1, random_moves=0)
+        if self.eval_mode == 'mcts_simple':
+            return self.get_move_mcts_simple(env, turn=1, random_moves=0)
 
     def get_move_model(self, env, turn=1, random_moves=0):
         """
@@ -200,7 +203,7 @@ class Agent:
         @param random_moves: number of moves before agent starts to play deterministic
         @return:
         """
-        pass
+        return get_move_mcts(copy.deepcopy(env.gameState))
 
     def get_move_mcts_boosted(self, env, turn=1, random_moves=0):
         """

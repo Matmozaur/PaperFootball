@@ -177,7 +177,7 @@ def play_valid(p1, p2, episodes, random_moves=0):
     for e in range(int(episodes / 2)):
         log_important('Secound half, game ',e)
         env.reset()
-        env.currentPlayer = -1
+        env.change_player()
         done, result = 0, 0
         turn = 0
         while done == 0:

@@ -311,6 +311,3 @@ class BBMenu(tk.Frame):
 
     def assign(self, x1, x2):
         x1[0]=x2
-
-app = GameWindow()
-app.mainloop()
