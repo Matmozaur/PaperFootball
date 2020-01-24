@@ -170,6 +170,8 @@ class Agent:
             return self.get_move_model(env, turn=1, random_moves=0)
         if self.eval_mode == 'mcts_simple':
             return self.get_move_mcts_simple(env, turn=1, random_moves=0)
+        if self.eval_mode == 'mcts_boosted':
+            return self.get_move_mcts_boosted(env, turn=1, random_moves=0)
 
     def get_move_model(self, env, turn=1, random_moves=0):
         """
@@ -212,58 +214,9 @@ class Agent:
         @param random_moves: number of moves before agent starts to play deterministic
         @return:
         """
-        pass
+        return get_move_mcts(copy.deepcopy(env.gameState), self.model)
 
 
-    # def get_move_deep_check(self, env, turn=1, random_moves=0):
-    #     """
-    #     @param env: current game state
-    #     @param turn: flag
-    #     @param random_moves: number of moves before agent starts to play deterministic
-    #     @return:
-    #     """
-    #     best_move, best_score = None, -100
-    #     all_moves = env.get_full_moves_deep()
-    #     start = time.time()
-    #     for move in all_moves:
-    #         sc = self.score_move(move, env, turn, random_moves)
-    #         # print(sc)
-    #         if move[2] == 1:
-    #             return move
-    #         if sc > best_score:
-    #             best_score = sc
-    #             best_move = move
-    #             # if sc == 100:
-    #             #     return best_move
-    #     end = time.time()
-    #     log('elapsed seconds evaluating:', end - start)
-    #     log('score', best_score)
-    #     return best_move
-
-    # def get_move_simple(self, env, turn=1, random_moves=0):
-    #     """
-    #     @param env: current game state
-    #     @param turn: flag
-    #     @param random_moves: number of moves before agent starts to play deterministic
-    #     @return:
-    #     """
-    #     best_move, best_score = None, -100
-    #     all_moves = env.get_full_moves_simple()
-    #     start = time.time()
-    #     for move in all_moves:
-    #         sc = self.score_move(move, env, turn, random_moves)
-    #         # print(sc)
-    #         if move[2] == 1:
-    #             return move
-    #         if sc > best_score:
-    #             best_score = sc
-    #             best_move = move
-    #             # if sc == 100:
-    #             #     return best_move
-    #     end = time.time()
-    #     log('elapsed seconds evaluating:', end - start)
-    #     log('score', best_score)
-    #     return best_move
 
     def score_move(self, move, env, turn, random_moves):
         """

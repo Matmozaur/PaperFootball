@@ -33,19 +33,6 @@ class BoardGui:
         self.player1 = None
         self.player2 = None
 
-    # def start(self):
-    #     # player1_file = open("temp_fw_trained", "rb")
-    #     # player2_file = open("temp_fw_trained", "rb")
-    #     # self.player1 = pickle.load(player1_file)
-    #     # self.player2 = pickle.load(player2_file)
-    #
-    #     self.root = tk.Tk()
-    #     # file = open('../controller/temp_fw_trained', 'rb')
-    #     # self.bot = pickle.load(file)
-    #     print("sdasdadas")
-    #     self.bot = Agent('dsdas', model=RandomModel())
-    #     print("bot", self.bot)
-    #     # self.set_panel()
 
     def get_move(self, bot=None):
         if bot is not None:
@@ -90,12 +77,6 @@ class BoardGui:
         if self.env.currentPlayer == -1:
             self.get_move()
 
-    # def next_move_bot(self):
-    #     print("env current: ",self.env.currentPlayer)
-    #     if self.env.currentPlayer == 1:
-    #         self.get_move(self.agent1)
-    #     else:
-    #         self.get_move(self.agent2)
 
     @staticmethod
     def get_positions(x, y):
@@ -222,8 +203,7 @@ class NewGameBU(tk.Frame):
 
         tk.Frame.__init__(self, parent)
         self.boardGui = BoardGui()
-        # self.boardGui.file = open('../controller/temp_fw_trained', 'rb')
-        # self.boardGui.bot = pickle.load(self.boardGui.file)
+        # important - here we can change bot to play with
         self.boardGui.bot = Agent('dsdas', model=RandomModel(), search_mode="simple")
         self.boardGui.agent = self.boardGui.bot
         self.boardGui.env = Game()
@@ -239,16 +219,6 @@ class NewGameBU(tk.Frame):
 
 
 
-
-        # button1 = tk.Button(self, text="Restart Game",
-        #                     command=lambda: controller.show_frame(NewGameBU))
-        # button1.pack(side=BOTTOM)
-
-        # button2 = tk.Button(self, text="Return",
-        #                     command=lambda: controller.show_frame(Menu))
-        # button2.pack(side=BOTTOM)
-
-
 class NewGameBB(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -262,6 +232,7 @@ class NewGameBB(tk.Frame):
         S.config(command=self.T.yview)
         self.T.config(yscrollcommand=S.set)
 
+    # important - here we can choose bots to play
     def generate_result(self, p1, p2, num):
         # self.T.insert(tk.END, p1+p2)
         # print(num)
