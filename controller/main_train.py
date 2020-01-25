@@ -20,7 +20,7 @@ def main_train(best_player, current_player, memory, iterations):
         play_training(best_player, best_player, memory, config.EPISODES, config.TURNS_UNTIL_DET)
         if len(memory.ltmemory) >= config.MEMORY_SIZE:
             current_player.retrain(memory)
-            # memory_random_1.clear_ltmemory()
+            memory.clear_ltmemory()
             scores = play_valid(current_player, best_player, config.EVAL_EPISODES, random_moves=2)
             log_important(scores)
             if ((scores['current_player'] + 1) / (scores['best_player'] + 1)) > config.SCORING_THRESHOLD:
@@ -40,7 +40,7 @@ memory = Memory(config.MEMORY_SIZE)
 current_player = Agent('current_player', current_nn)
 best_player = Agent('best_player', best_nn)
 
-main_train(best_player, current_player, memory, 100)
+main_train(best_player, current_player, memory, 30)
 best_player.model.save('../resources/DNN_deep_check_trained.h5')
 
 # memory = Memory(config.MEMORY_SIZE)

@@ -132,8 +132,8 @@ def play_training(p1, p2, memory, episodes, random_moves=0):
             if move is not None:
                 if len(move) > 0:
                     # To be changed 1!
-                    if len(memory.ltmemory) >= 1.5*config.MEMORY_SIZE:
-                        memory.ltmemory.popleft()
+                    # if len(memory.ltmemory) >= 1.5*config.MEMORY_SIZE:
+                    #     memory.ltmemory.popleft()
                     if turn > 7:
                         memory.append_stmemory(env.currentPlayer, move[3], move[1])
                 # memory_random_1.append_stmemory(env.currentPlayer, move[3], move[1])
