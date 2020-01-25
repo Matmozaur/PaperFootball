@@ -5,9 +5,10 @@ import webbrowser
 from _tkinter import TclError
 from tkinter import Button, BOTTOM, BOTH
 import tkinter as tk
-
+import tensorflow as tf
 from model import game_state_utils
 from model.ml_module.dummy_models import RandomModel, ForwardModel, BackwardModel
+from model.ml_module.ml_models import DNN
 from view.board import Board
 from model.ml_module.agent import Agent
 from model.game import Game
@@ -204,7 +205,10 @@ class NewGameBU(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.boardGui = BoardGui()
         # important - here we can change bot to play with
-        self.boardGui.bot = Agent('dsdas', model=RandomModel(), search_mode="simple")
+        best_nn = DNN()
+        best_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check.h5')
+        player = Agent('my_player', best_nn)
+        self.boardGui.bot = player
         self.boardGui.agent = self.boardGui.bot
         self.boardGui.env = Game()
         self.boardGui.board = Board(self)
