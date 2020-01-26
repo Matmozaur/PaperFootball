@@ -1,6 +1,11 @@
-import numpy as np
-
+import copy
+import multiprocessing
+import time
+from random import shuffle
+from joblib import Parallel, delayed
 from controller import config
+from controller.logger import log
+from model.game_state_utils import get_positions, get_move, get_neighbours, turn_board
 
 
 class GameState:
@@ -10,6 +15,7 @@ class GameState:
     Lines are tuples (x,y) where x is integer from 0 to 48 and y from 0 to 8, they indicates lines on the field.
     Lines differs regarding to x%4, 0:_ 1: | 2: \  3: /
     """
+
     def __init__(self, board, player_turn, current_position):
         """
         @param board: current state of game field
@@ -20,51 +26,6 @@ class GameState:
         self.playerTurn = player_turn
         self.current_position = current_position
 
-    @staticmethod
-    def turn_board(board):
-        """
-        @param board: state of game field
-        @return: state of game field from the other player's view
-        """
-        board2 = np.zeros((48, 8), dtype=int)
-        board2[1::4, 0] = 1
-        board2[:5, :] = 1
-        board2[-4:, :] = 1
-        board2[1:5, [3, 4]] = 0
-        board2[-5:, [3, 4]] = 0
-        board2[1, 3] = 1
-        board2[-3, 3] = 1
-        for i in range(3, 43):
-            for j in range(8):
-                if i % 4 == 1:
-                    if j == 0:
-                        board2[i, j] = 1
-                    else:
-                        board2[i, j] = board[46 - i, 8 - j]
-                elif i % 4 == 2:
-                    board2[i + 2, j] = board[46 - i, 7 - j]
-                elif i % 4 == 0:
-                    board2[i + 2, j] = board[46 - i, 7 - j]
-                elif i % 4 == 3:
-                    board2[i + 4, j] = board[46 - i, 7 - j]
-
-        board2[44, 3] = board[4, 4]
-        board2[44, 4] = board[4, 3]
-        board2[45, 4] = board[1, 4]
-        board2[46, 3] = board[2, 4]
-        board2[46, 4] = board[2, 3]
-        board2[47, 3] = board[3, 4]
-        board2[47, 4] = board[3, 3]
-
-        board2[4, 4] = board[44, 3]
-        board2[4, 3] = board[44, 4]
-        board2[1, 4] = board[45, 4]
-        board2[2, 4] = board[46, 3]
-        board2[2, 3] = board[46, 4]
-        board2[3, 4] = board[47, 3]
-        board2[3, 3] = board[47, 4]
-        return board2
-
     def allowed_actions(self, tmp_board=None, tmp_current_position=None):
         """
         @param tmp_board: state of game field
@@ -72,173 +33,14 @@ class GameState:
         @return: all posible lines we can put on the field in that partial move
         """
         if tmp_board is not None and tmp_current_position is not None:
-            neighbours = self.get_neighbours(tmp_current_position)
-            print(neighbours)
-            allowed = [self.get_move(tmp_current_position, x) for x in neighbours]
-            print(allowed)
+            neighbours = get_neighbours(tmp_current_position)
+            allowed = [get_move(tmp_current_position, x) for x in neighbours]
             allowed = [x for x in allowed if tmp_board[x[0], x[1]] == 0]
         else:
-            neighbours = self.get_neighbours(self.current_position)
-            allowed = [self.get_move(self.current_position, x) for x in neighbours]
+            neighbours = get_neighbours(self.current_position)
+            allowed = [get_move(self.current_position, x) for x in neighbours]
             allowed = [x for x in allowed if self.board[x[0], x[1]] == 0]
         return allowed
-
-    # def move(self, position):
-    #     a, b = self.get_move(self.current_position, position)
-    #     if (a, b) in self._allowed_actions():
-    #         self.board[a, b] = 1
-    #         self.current_position = position
-    #     else:
-    #         print('Error, wrong move')
-
-    # def check_for_end_game(self):
-    #     if len(self.allowed_actions()) == 0:
-    #         return -1
-    #     if self.current_position[0] == 12:
-    #         return -1
-    #     if self.current_position[0] == 0:
-    #         return 1
-    #     return 0
-
-    @staticmethod
-    def get_neighbours(position):
-        """
-        @param position: given position on the board
-        @return: all points to which we can possible move
-        """
-        neighbours = [(position[0] - 1, position[1] - 1), (position[0] - 1, position[1]),
-                      (position[0], position[1] - 1),
-                      (position[0] + 1, position[1] + 1), (position[0] + 1, position[1]),
-                      (position[0], position[1] + 1),
-                      (position[0] + 1, position[1] - 1), (position[0] - 1, position[1] + 1)]
-        to_del = []
-        for x in neighbours:
-            if (x[0] < 0) or (x[0] > 12):
-                to_del.append(x)
-                continue
-            elif (x[1] < 0) or (x[1] > 8):
-                to_del.append(x)
-            if (position[0] == 12) and (x[0] == 12):
-                to_del.append(x)
-            if (position[1] == 8) and (x[1] == 8):
-                to_del.append(x)
-
-        return [x for x in neighbours if x not in to_del]
-
-    @staticmethod
-    def get_move(position1, position2):
-        """
-        @param position1: point before move
-        @param position2: point after move
-        @return: line between points
-        """
-        x = min(position1[1], position2[1])
-        if position1[1] == position2[1]:
-            if position1[0] > position2[0]:
-                y = 4 * (position1[0] - 1) + 1
-            else:
-                y = 4 * position1[0] + 1
-        else:
-            if position1[0] > position2[0]:
-                if position1[1] > position2[1]:
-                    y = 4 * (position1[0] - 1) + 2
-                else:
-                    y = 4 * (position1[0] - 1) + 3
-            elif position1[0] == position2[0]:
-                y = 4 * position1[0]
-            else:
-                if position1[1] < position2[1]:
-                    y = 4 * position1[0] + 2
-                else:
-                    y = 4 * position1[0] + 3
-        return y, x
-
-    @staticmethod
-    def get_positions(y, x):
-        """
-        @param y: y coordinate of line
-        @param x: x coordinate of line
-        @return: points connected by this line
-        """
-        position1 = [0, 0]
-        position2 = [0, 0]
-        position1[1] = x
-        if y % 4 == 0:
-            position2[1] = x + 1
-            position1[0] = int(y / 4)
-            position2[0] = int(y / 4)
-        elif y % 4 == 1:
-            position2[1] = x
-            position1[0] = int(y / 4)
-            position2[0] = int(y / 4 + 1)
-        elif y % 4 == 2:
-            position2[1] = x + 1
-            position1[0] = int(y / 4)
-            position2[0] = int(y / 4) + 1
-        elif y % 4 == 3:
-            position2[1] = x + 1
-            position1[0] = int(y / 4) + 1
-            position2[0] = int(y / 4)
-        return tuple(position1), tuple(position2)
-
-    def get_full_moves(self):
-        full_moves = []
-
-        def check_for_danger(board, tmp_current_pos):
-            board_temp = GameState.turn_board(board)
-            tmp_current_pos_turned = (12 - tmp_current_pos[0], 8 - tmp_current_pos[1])
-            # print(board, tmp_current_pos)
-            local_moves = []
-            get_full_moves_utils(self, [], board_temp, tmp_current_pos_turned, local_moves, safety=False, c_p=tmp_current_pos_turned)
-            print([(p[0], p[1], p[2]) for p in local_moves])
-            if not local_moves:
-                return 1
-            elif local_moves[0][2] == 1:
-                return -1
-            return 0
-
-        def get_full_moves_utils(self, path, board, tmp_current_pos, full_moves, safety=True, c_p=self.current_position):
-            if len(full_moves) >config.max_t:
-                return
-            if tmp_current_pos != c_p and len(self.allowed_actions(board, tmp_current_pos)) == 7:
-                if safety:
-                    print('checks move:', path)
-                    checker = check_for_danger(board, tmp_current_pos)
-                    if checker == -1:
-                        return
-                    if checker == 1:
-                        full_moves.append((path, tmp_current_pos, 1, board))
-                        return
-                full_moves.append((path, tmp_current_pos, 0, board))
-                return
-            elif tmp_current_pos in {(12, 3), (12, 4), (12, 5)}:
-                return
-            if tmp_current_pos in {(0, 3), (0, 4), (0, 5)}:
-                full_moves.clear()
-                full_moves.append((path, tmp_current_pos, 1, board))
-            # print(self._allowed_actions(board,tmp_current_pos))
-            else:
-                for neighbour in self.allowed_actions(board, tmp_current_pos):
-                    tmp_board = board.copy()
-                    tmp_path = path.copy()
-                    positions = self.get_positions(neighbour[0], neighbour[1])
-                    if positions[0] == tmp_current_pos:
-                        x, y = positions[1]
-                    else:
-                        x, y = positions[0]
-
-                    # print(x,y)
-                    tmp_board[neighbour] = 1
-                    tmp_path.append(neighbour)
-                    # print('tmp_path: ', tmp_path)
-                    # print('tmp_board: ', tmp_board)
-                    # print('tmp_current_pos: ', tmp_current_pos)
-                    # print('neighbour: ', neighbour)
-
-                    get_full_moves_utils(self, tmp_path, tmp_board, (x, y), full_moves, safety=safety)
-
-        get_full_moves_utils(self, [], self.board, self.current_position, full_moves)
-        return full_moves
 
     def make_move(self, move):
         """
@@ -260,82 +62,210 @@ class GameState:
             done = 0
         return done, move[2]
 
+    def get_full_moves_deep(self, max_moves=config.MAX_MOVES, max_final_moves=config.MAX_FINAL_MOVES,
+                            max_checked_moves=config.MAX_CHECKED_MOVES):
+        """
+            @param max_moves: maximal number of moves which will be checked
+            @param max_final_moves: maximal number of returned moves
+            @param max_checked_moves: maximal number of moves checked while analysing move
+            @return: list of possible moves which won't lose game
+            """
+        start = time.time()
+        full_moves = []
+        num_cores = multiprocessing.cpu_count()
 
-# # from article
-#     def _allowedActions(self, allowed = [], path = []):
-#         for a in self.get_neighbours(self.current_position):
-#             if a not in path:
-#                 if len(self.get_neighbours(a)) == 7:
-#                     path.append(a)
-#                     allowed.append(path)
-#                 else:
-#                     path.append(a)
-#                     allowed += self._allowedActions(self, allowed = allowed, path = path)
-#         return allowed
+        def check_for_danger(board, tmp_current_pos, full_moves_final=[]):
+            board_temp = turn_board(board)
+            tmp_current_pos_turned = (12 - tmp_current_pos[0], 8 - tmp_current_pos[1])
+            local_moves = []
+            get_full_moves_utils(self, [], board_temp, tmp_current_pos_turned, local_moves,
+                                 c_p=tmp_current_pos_turned, max_moves=max_checked_moves,
+                                 full_moves_final=full_moves_final)
+            if len(full_moves_final) >= 1:
+                if full_moves_final[0][2] == 1:
+                    return -1
+            if len(full_moves_final) > max_final_moves:
+                return -1
+            if not local_moves:
+                return 1
+            elif local_moves[0][2] == 1:
+                return -1
+            return 0
 
+        def go_through_neighbour(self, board, path, neighbour, tmp_current_pos, full_moves, max_moves,
+                                 full_moves_final=[]):
+            tmp_board = copy.deepcopy(board)
+            tmp_path = copy.deepcopy(path)
+            positions = get_positions(neighbour[0], neighbour[1])
+            if positions[0] == tmp_current_pos:
+                x, y = positions[1]
+            else:
+                x, y = positions[0]
+            tmp_board[neighbour] = 1
+            tmp_path.append(neighbour)
+            get_full_moves_utils(self, tmp_path, tmp_board, (x, y), full_moves, max_moves=max_moves,
+                                 full_moves_final=full_moves_final)
+            del tmp_board, tmp_path
 
-# def _binary(self):
-#
-# 	currentplayer_position = np.zeros(len(self.board), dtype=np.int)
-# 	currentplayer_position[self.board==self.playerTurn] = 1
-#
-# 	other_position = np.zeros(len(self.board), dtype=np.int)
-# 	other_position[self.board==-self.playerTurn] = 1
-#
-# 	position = np.append(currentplayer_position,other_position)
-#
-# 	return (position)
-#
-# def _convertStateToId(self):
-# 	player1_position = np.zeros(len(self.board), dtype=np.int)
-# 	player1_position[self.board==1] = 1
-#
-# 	other_position = np.zeros(len(self.board), dtype=np.int)
-# 	other_position[self.board==-1] = 1
-#
-# 	position = np.append(player1_position,other_position)
-#
-# 	id = ''.join(map(str,position))
-#
-# 	return id
-#
-# def _checkForEndGame(self):
-# 	if np.count_nonzero(self.board) == 42:
-# 		return 1
-#
-# 	for x,y,z,a in self.winners:
-# 		if (self.board[x] + self.board[y] + self.board[z] + self.board[a] == 4 * -self.playerTurn):
-# 			return 1
-# 	return 0
-#
-#
-# def _getValue(self):
-# 	# This is the value of the state for the current player
-# 	# i.e. if the previous player played a winning move, you lose
-# 	for x,y,z,a in self.winners:
-# 		if (self.board[x] + self.board[y] + self.board[z] + self.board[a] == 4 * -self.playerTurn):
-# 			return (-1, -1, 1)
-# 	return (0, 0, 0)
-#
-#
-# def _getScore(self):
-# 	tmp = self.value
-# 	return (tmp[1], tmp[2])
-#
-#
-#
-#
-# def takeAction(self, action):
-# 	newBoard = np.array(self.board)
-# 	newBoard[action]=self.playerTurn
-#
-# 	newState = GameState(newBoard, -self.playerTurn)
-#
-# 	value = 0
-# 	done = 0
-#
-# 	if newState.isEndGame:
-# 		value = newState.value[0]
-# 		done = 1
-#
-# 	return (newState, value, done)
+        def get_full_moves_utils(self, path, board, tmp_current_pos, full_moves, c_p=self.current_position,
+                                 max_moves=max_moves,
+                                 full_moves_final=[]):
+            if (time.time() - start) >= config.MAX_TIME_CHECKING:
+                return
+            if len(full_moves) > max_moves:
+                return
+            if len(full_moves_final) > max_final_moves:
+                return
+            if len(full_moves_final) >= 1:
+                if full_moves_final[0][2] == 1:
+                    return
+            if tmp_current_pos != c_p and len(self.allowed_actions(board, tmp_current_pos)) == 7:
+                full_moves.append((path, tmp_current_pos, 0, board))
+                return
+            elif tmp_current_pos in {(12, 3), (12, 4), (12, 5)}:
+                return
+            if tmp_current_pos in {(0, 3), (0, 4), (0, 5)}:
+                full_moves.clear()
+                full_moves.append((path, tmp_current_pos, 1, board))
+                return
+            else:
+                actions = self.allowed_actions(board, tmp_current_pos)
+                shuffle(actions)
+                for neighbour in actions:
+                    go_through_neighbour(self, board, path, neighbour, tmp_current_pos, full_moves, max_moves,
+                                         full_moves_final)
+
+        def check_move(m, full_moves_final):
+            if (time.time() - start) >= config.MAX_TIME_CHECKING:
+                return
+            if len(full_moves_final) >= max_final_moves:
+                return
+            if len(full_moves_final) >= 1:
+                if full_moves_final[0][2] == 1:
+                    return
+            if m[2] == 1:
+                full_moves_final.clear()
+                full_moves_final.append(m)
+                return
+            check = check_for_danger(m[3], m[1], full_moves_final)
+            if check == -1:
+                return
+            elif check == 1:
+                full_moves_final.clear()
+                full_moves_final.append(m)
+                return
+            else:
+                full_moves_final.append(m)
+
+        get_full_moves_utils(self, [], self.board, self.current_position, full_moves)
+        end = time.time()
+        log('elapsed seconds prepare moves:', end - start)
+
+        start = time.time()
+        full_moves_final = []
+        shuffle(full_moves)
+        Parallel(n_jobs=num_cores, backend="threading")(delayed(check_move)(m, full_moves_final) for m in full_moves)
+        if len(full_moves) == 0:
+            temp = self.get_random_move()
+            if len(temp) > 0:
+                full_moves.append(temp)
+        end = time.time()
+        log('elapsed seconds checking:', end - start)
+        log('final_moves', len(full_moves_final))
+        del full_moves
+        return full_moves_final
+
+    def get_full_moves_simple(self, max_moves=config.MAX_MOVES_SIMPLE, max_time=config.MAX_TIME_CHECKING_SIMPLE):
+        """
+            @param max_time: max time
+            @param max_moves: maximal number of moves which will be checked
+            @return: list of possible moves which won't lose game
+        """
+        start = time.time()
+        full_moves = []
+
+        def go_through_neighbour(self, board, path, neighbour, tmp_current_pos, full_moves, max_moves,
+                                 full_moves_final=[]):
+            tmp_board = copy.deepcopy(board)
+            tmp_path = copy.deepcopy(path)
+            positions = get_positions(neighbour[0], neighbour[1])
+            if positions[0] == tmp_current_pos:
+                x, y = positions[1]
+            else:
+                x, y = positions[0]
+            tmp_board[neighbour] = 1
+            tmp_path.append(neighbour)
+            get_full_moves_utils(self, tmp_path, tmp_board, (x, y), full_moves, max_moves=max_moves,
+                                      full_moves_final=full_moves_final)
+
+        def get_full_moves_utils(self, path, board, tmp_current_pos, full_moves, c_p=self.current_position,
+                                 max_moves=max_moves,
+                                 full_moves_final=[]):
+            if (time.time() - start) >= max_time:
+                return
+            if len(full_moves) > max_moves:
+                return
+            if len(full_moves_final) >= 1:
+                if full_moves_final[0][2] == 1:
+                    return
+            if tmp_current_pos != c_p and len(self.allowed_actions(board, tmp_current_pos)) == 7:
+                full_moves.append((path, tmp_current_pos, 0, board))
+                return
+            elif tmp_current_pos in {(12, 3), (12, 4), (12, 5)}:
+                return
+            if tmp_current_pos in {(0, 3), (0, 4), (0, 5)}:
+                full_moves.clear()
+                full_moves.append((path, tmp_current_pos, 1, board))
+                return
+            else:
+                actions = self.allowed_actions(board, tmp_current_pos)
+                shuffle(actions)
+                for neighbour in actions:
+                    go_through_neighbour(self, board, path, neighbour, tmp_current_pos, full_moves, max_moves,
+                                         full_moves_final)
+
+        get_full_moves_utils(self, [], self.board, self.current_position, full_moves)
+        if len(full_moves) == 0:
+            temp = self.get_random_move()
+            if len(temp) > 0:
+                full_moves.append(temp)
+        end = time.time()
+        end = time.time()
+        log('elapsed seconds checking:', end - start)
+        log('final_moves', len(full_moves))
+        return full_moves
+
+    def get_random_move(self, path=[], board=None, tmp_current_pos=None, start=None):
+
+        def go_through_neighbour(self, board, path, neighbour, tmp_current_pos):
+            tmp_board = copy.deepcopy(board)
+            tmp_path = copy.deepcopy(path)
+            positions = get_positions(neighbour[0], neighbour[1])
+            if positions[0] == tmp_current_pos:
+                x, y = positions[1]
+            else:
+                x, y = positions[0]
+            tmp_board[neighbour] = 1
+            tmp_path.append(neighbour)
+            return self.get_random_move(tmp_path, tmp_board, (x, y), start)
+
+        if board is None:
+            board = self.board
+            tmp_current_pos = self.current_position
+            start = time.time()
+        if (time.time() - start) >= config.MAX_TIME_RANDOM:
+            return []
+        if tmp_current_pos != self.current_position and len(self.allowed_actions(board, tmp_current_pos)) == 7:
+            return (path, tmp_current_pos, 0, board)
+        elif tmp_current_pos in {(12, 3), (12, 4), (12, 5)}:
+            return []
+        if tmp_current_pos in {(0, 3), (0, 4), (0, 5)}:
+            return (path, tmp_current_pos, 1, board)
+        else:
+            actions = self.allowed_actions(board, tmp_current_pos)
+            shuffle(actions)
+            for neighbour in actions:
+                x = go_through_neighbour(self, board, path, neighbour, tmp_current_pos)
+                if len(x) > 0:
+                    return x
+        return []

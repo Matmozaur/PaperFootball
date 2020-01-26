@@ -1,12 +1,20 @@
 import doctest
+import json
 import pickle
+import webbrowser
 from _tkinter import TclError
-from tkinter import Button
+from tkinter import Button, BOTTOM, BOTH
 import tkinter as tk
+import tensorflow as tf
+from model import game_state_utils
 from model.ml_module.dummy_models import RandomModel, ForwardModel, BackwardModel
+from model.ml_module.ml_models import DNN
 from view.board import Board
 from model.ml_module.agent import Agent
 from model.game import Game
+from controller import playing
+
+LARGE_FONT = ("Verdana", 12)
 
 
 def turn_path(path):
@@ -16,27 +24,16 @@ def turn_path(path):
 class BoardGui:
     def __init__(self):
         self.root = None
-        self.window = tk.Tk()
+        self.window = None
         self.board = None
         self.agent = None
         self.env = None
         self.agent1 = None
         self.agent2 = None
         self.bot = None
-        # player1_file = open("temp_fw_trained", "rb")
-        # player2_file = open("temp_fw_trained", "rb")
-        # self.player1 = pickle.load(player1_file)
-        # self.player2 = pickle.load(player2_file)
+        self.player1 = None
+        self.player2 = None
 
-    def start(self):
-        self.root = tk.Tk()
-        file = open('../controller/temp_fw_trained', 'rb')
-        self.bot = pickle.load(file)
-        # self.bot = Agent('dsdas', model=ForwardModel())
-
-        self.set_game_window()
-
-        self.set_panel()
 
     def get_move(self, bot=None):
         if bot is not None:
@@ -44,23 +41,26 @@ class BoardGui:
         else:
             (path, tmp_current_pos, _, board) = self.agent.get_move(self.env)
         self.env.make_move((path, tmp_current_pos, 0, board))
+
         self.env.change_player()
+
         tmp_current_pos = (12 - tmp_current_pos[0], 8 - tmp_current_pos[1])
         path_points = turn_path([self.get_positions(path_el[0], path_el[1]) for path_el in path])
-        self.board.implement_move(path_points, tmp_current_pos, self.get_allowable_points())
+        self.board.implement_move(path_points, tmp_current_pos, self.get_allowable_points(), -self.env.currentPlayer)
 
     def make_move(self):
-        self.board.last_move = []
-        self.env.change_player()
+        # self.board.last_move = []
 
+        self.env.change_player()
     def add_line_to_move(self, point):
         # print(point)
-        self.env.make_move([[self.env.gameState.get_move(point, self.board.current_point)], point, 0])
+        self.env.make_move([[game_state_utils.get_move(point, self.board.current_point)], point, 0])
 
         # print(self.env.gameState.get_move((2,6), (1,5)))
 
-        self.board.last_move.append((self.board.current_point, point))
-        self.board.implement_move([(self.board.current_point, point)], point, self.get_allowable_points())
+        # self.board.last_move.append((self.board.current_point, point))
+        print("env current: ", self.env.currentPlayer)
+        self.board.implement_move([(self.board.current_point, point)], point, self.get_allowable_points(), self.env.currentPlayer)
         if len(self.get_allowable_points()) == 7:
             self.make_move()
 
@@ -78,67 +78,6 @@ class BoardGui:
         if self.env.currentPlayer == -1:
             self.get_move()
 
-    def new_game(self):
-        try:
-            self.window.destroy()
-        except TclError:
-            print("Game window closed")
-        finally:
-            self.window = tk.Tk()
-            self.set_game_window()
-            self.agent = self.bot
-            self.env = Game()
-            self.board = Board(self.window)
-            self.board.draw_board()
-            self.board.color_current_point()
-            self.board.color_allowable_points()
-            self.board.canvas.pack(fill="both", expand=True)
-            # self.board.canvas.bind('<>', self.get_move())
-            self.board.canvas.bind('<Button>', self.on_click)
-
-    def set_game_window(self):
-        self.window.geometry("400x600")
-
-    def set_panel(self):
-        frame = tk.Frame(self.root)
-        frame.pack()
-        button_new_game = Button(frame, text="New game", command=self.new_game, width="25")
-        button_new_robot_fight = Button(frame, text="New robot fight", command=self.new_game_bot, width="25")
-        button_next_robot_turn = Button(frame, text="Next move", command=self.next_move_bot, width="25")
-        button_quit = Button(frame, text="Quit", command=self.close_windows, width="25")
-        button_new_game.pack()
-        button_new_robot_fight.pack()
-        button_next_robot_turn.pack()
-        button_quit.pack()
-        self.root.mainloop()
-
-    def new_game_bot(self):
-        try:
-            self.window.destroy()
-        except TclError:
-            print("Game window closed")
-        finally:
-            self.window = tk.Tk()
-            self.set_game_window()
-            self.agent1 = self.bot
-            self.agent2 = self.bot
-            self.env = Game()
-            self.board = Board(self.window)
-            self.board.draw_board()
-            self.board.color_current_point()
-            self.board.color_allowable_points()
-            self.board.canvas.pack(fill="both", expand=True)
-
-    def next_move_bot(self):
-        if self.env.currentPlayer == 1:
-            self.get_move(self.agent1)
-        else:
-            self.get_move(self.agent2)
-
-
-    def close_windows(self):
-        self.window.destroy()
-        self.root.destroy()
 
     @staticmethod
     def get_positions(x, y):
@@ -184,4 +123,195 @@ class BoardGui:
         self.board.canvas.pack(fill="both", expand=True)
         self.board.draw_lines(lines)
         self.window.mainloop()
-# BoardGui()
+
+    def test_board(self):
+        self.window = tk.Tk()
+        self.set_game_window()
+        self.env = Game()
+        self.board = Board(self.window)
+        self.board.draw_board()
+        self.board.color_current_point()
+        self.board.color_allowable_points()
+        self.board.canvas.pack(fill="both", expand=True)
+        self.env.gameState.board[17, 3] = 1
+        self.env.gameState.board[20, 3] = 1
+        self.env.gameState.board[21, 4] = 1
+        self.env.gameState.current_position = (4, 3)
+        # print([self.env.gameState.get_move(x,y) for x,y in [[(4,3),(5,3)],[(5,3),(5,4)],[(5,4),(6,4)]]])
+        print(self.env.gameState.get_move((6, 4), (5, 4)))
+        # print(self.env.gameState.get_full_moves())
+        self.board.draw_lines([self.get_positions(x, y) for x, y in [(21, 4), (20, 3)]])
+        # self.board.draw_lines([[(4,3),(5,3)],[(5,3),(5,4)],[(5,4),(6,4)]])
+        self.window.mainloop()
+
+
+class GameWindow(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+
+        container = tk.Frame(self)
+        container.pack(fill=BOTH, expand=True)
+
+        self.geometry("400x600")
+        self.frames = {}
+
+        for F in (Menu, NewGameBU, BBMenu, NewGameBB):
+            frame = F(container, self)
+            self.frames[F] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+        self.show_frame(Menu)
+
+    def show_frame(self, cont, p1=None, p2=None, num=None):
+        if cont == NewGameBB and p1 is not None and p2 is not None and num is not None:
+            self.frames[cont].generate_result(p1,p2,num)
+
+
+        frame = self.frames[cont]
+        frame.tkraise()
+
+
+class Menu(tk.Frame):
+
+    def __init__(self, parent, controller):
+
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Paper Football", font=LARGE_FONT, pady=50)
+        label.pack()
+
+        button_new_game = tk.Button(self, text="New Game user-bot",
+                                    command=lambda: controller.show_frame(NewGameBU), width="25")
+        button_new_game.pack()
+
+        button_new_bot_game = tk.Button(self, text="New Game bot-bot",
+                                        command=lambda: controller.show_frame(BBMenu), width="25")
+        button_new_bot_game.pack()
+
+        button_instructions = tk.Label(self, text="How To Play", fg="blue", cursor="hand2", width="25")
+        button_instructions.pack()
+        button_instructions.bind("<Button-1>", lambda e: webbrowser.open_new("https://en.wikipedia.org/wiki/Paper_soccer"))
+
+        button_instructions.pack()
+
+        button_quit = tk.Button(self, text="Quit",
+                                command=self.destroy, width="25")
+        button_quit.pack()
+
+
+class NewGameBU(tk.Frame):
+
+    def __init__(self, parent, controller):
+
+        tk.Frame.__init__(self, parent)
+        self.boardGui = BoardGui()
+        # important - here we can change bot to play with
+        best_nn = DNN()
+        best_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check.h5')
+        player = Agent('my_player', best_nn)
+        self.boardGui.bot = player
+        self.boardGui.agent = self.boardGui.bot
+        self.boardGui.env = Game()
+        self.boardGui.board = Board(self)
+        self.boardGui.board.draw_board()
+        self.boardGui.board.color_current_point()
+        self.boardGui.board.color_allowable_points()
+        self.boardGui.board.canvas.config(width=400, height=600)
+        self.boardGui.board.canvas.bind('<Button>', self.boardGui.on_click)
+        self.boardGui.board.canvas.pack(fill=BOTH, expand=True)
+
+
+
+
+
+class NewGameBB(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        # label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
+        # label.pack(pady=10, padx=10)
+        S = tk.Scrollbar(self)
+        S.pack(side=tk.RIGHT, fill=tk.Y)
+        self.T = tk.Text(self, height=50, width=50)
+        self.T.pack()
+        S.config(command=self.T.yview)
+        self.T.config(yscrollcommand=S.set)
+
+    # important - here we can choose bots to play
+    def generate_result(self, p1, p2, num):
+        # self.T.insert(tk.END, p1+p2)
+        # print(num)
+        if p1 == "Random_simple":
+            player1 = Agent('Random_simple',  RandomModel(), search_mode='simple', eval_mode='model')
+        elif p1 == "Random_deep":
+            player1 = Agent('Random_deep',  RandomModel(), search_mode='deep', eval_mode='model')
+        elif p1 == "Forward_simple":
+            player1 = Agent('Forward_simple',  ForwardModel(), search_mode='simple', eval_mode='model')
+        elif p1 == "Forward_deep":
+            player1 = Agent('Forward_deep',  ForwardModel(), search_mode='deep', eval_mode='model')
+        elif p1 == "MCTS_simple":
+            player1 = Agent('MCTS_simple',  RandomModel(), eval_mode='mcts_simple')
+        elif p1 == "DNN_deep":
+            best_nn = DNN()
+            best_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check_trained.h5')
+            player1 = Agent('DNN_deep',  best_nn, search_mode='deep', eval_mode='model')
+        elif p1 == "Residual_CNN_MCTS":
+
+            player1 = Agent('Residual_CNN_MCTS',  RandomModel(), search_mode='deep', eval_mode='mcts_boosted')
+
+        if p2 == "Random_simple":
+            player2 = Agent('Random_simple', RandomModel(), search_mode='simple', eval_mode='model')
+        elif p2 == "Random_deep":
+            player2 = Agent('Random_deep', RandomModel(), search_mode='deep', eval_mode='model')
+        elif p2 == "Forward_simple":
+            player2 = Agent('Forward_simple', ForwardModel(), search_mode='simple', eval_mode='model')
+        elif p2 == "Forward_deep":
+            player2 = Agent('Forward_deep', ForwardModel(), search_mode='deep', eval_mode='model')
+        elif p2 == "MCTS_simple":
+            player2 = Agent('MCTS_simple', RandomModel(), eval_mode='mcts_simple')
+        elif p2 == "DNN_deep":
+            nn = DNN()
+            nn.model = tf.keras.models.load_model('../resources/DNN_deep_check_trained.h5')
+            player2 = Agent('DNN_deep', nn, search_mode='deep', eval_mode='model')
+        elif p2 == "Residual_CNN_MCTS":
+
+            player2 = Agent('Residual_CNN_MCTS', RandomModel(), search_mode='deep', eval_mode='mcts_boosted')
+
+        # if p2 == "Rndom":
+        #     player2 = Agent('Random', model=RandomModel())
+        # elif p2 == "Forward":
+        #     player2 = Agent('Forward', model=ForwardModel())
+
+
+        res = playing.play_valid(player1,player2,num)
+        self.T.insert(tk.END,str(res))
+
+class BBMenu(tk.Frame):
+
+    def __init__(self, parent, controller):
+        self.p1_val = ["Random_simple"]
+        self.p2_val = ["Random_simple"]
+        tk.Frame.__init__(self, parent)
+        label1 = tk.Label(self, text="Player 1", font=LARGE_FONT)
+        label1.pack(pady=10, padx=10)
+        variable1 = tk.StringVar(self)
+        variable1.set("Random_simple")
+        p1 = tk.OptionMenu(self, variable1, "Random_simple", "Random_deep", "Forward_simple", "Forward_deep", "MCTS_simple",
+        "DNN_deep", "Residual_CNN_MCTS", command= (lambda x: self.assign(self.p1_val, x)))
+        p1.pack()
+        label2 = tk.Label(self, text="Player 2", font=LARGE_FONT)
+        label2.pack(pady=10, padx=10)
+        variable2 = tk.StringVar(self)
+        variable2.set("Random_simple")
+        p2 = tk.OptionMenu(self, variable2, "Random_simple", "Random_deep", "Forward_simple", "Forward_deep", "MCTS_simple",
+        "DNN_deep", "Residual_CNN_MCTS",  command= (lambda x: self.assign(self.p2_val, x)))
+        p2.pack()
+        label3 = tk.Label(self, text="Number of epochs", font=LARGE_FONT)
+        label3.pack(pady=10, padx=10)
+        w = tk.Spinbox(self, values=list(range(0, 100+1, 2)))
+        w.pack()
+        button_play = tk.Button(self, text="Play",
+                                command=lambda: controller.show_frame(NewGameBB, self.p1_val[0], self.p2_val[0], int(w.get())))
+        button_play.pack(pady=10, padx=10)
+
+    def assign(self, x1, x2):
+        x1[0]=x2

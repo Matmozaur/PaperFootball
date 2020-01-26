@@ -1,8 +1,11 @@
 import tkinter as tk
 from time import sleep
 
+LARGE_FONT = ("Verdana", 12)
 
 class Board:
+
+
     def __init__(self, window):
         self.window = window
         self.canvas = tk.Canvas(self.window)
@@ -13,8 +16,10 @@ class Board:
         self.last_move = []
         self.allowable_points = [(5, 3), (5, 4), (5, 5), (6, 3), (6, 5), (7, 3), (7, 4), (7, 5)]
         self.clicked_point = (6, 4)
-        self.player = 1
+        self.player = -1
         self.lines = []
+        self.last_point = (6, 4)
+
 
     # ----------------------------------------squares----------------------------
     def draw_board(self):
@@ -99,20 +104,67 @@ class Board:
             self.square_size * point[1] + self.point_radius, self.square_size * point[0] +
             self.point_radius, fill="black")
 
+    def color_last_point(self):
+        self.canvas.delete(self.points_gui[self.last_point[0]][self.last_point[1]])
+        self.points_gui[self.last_point[0]][self.last_point[1]] = self.canvas.create_oval(
+            self.square_size * self.last_point[1] - 5, self.square_size * self.last_point[0] - 5,
+            self.square_size * self.last_point[1] + 5, self.square_size * self.last_point[0] + 5, fill="yellow")
+
+    def draw_lines_colored(self, lines):
+        for i in range(0, lines.__len__()):
+            self.canvas.create_line(50 * lines[i][0][1], 50 * lines[i][0][0], 50 * lines[i][1][1], 50 * lines[i][1][0],
+                                    width=2, fill='yellow')
+
     def get_clicked_point(self, board_x, board_y):
         for point in self.allowable_points:
             if point[0] * 50 - 5 <= board_y <= point[0] * 50 + 5 and point[1] * 50 - 5 <= board_x <= point[1] * 50 + 5:
                 return point
 
-    def implement_move(self, path_points, tmp_current_pos, allowable_points):
-        self.uncolor_point(self.current_point)
+
+
+    def concat_paths(self,path1,path2):
+        for line2 in path2:
+            f = False
+            for line1 in path1:
+                if line1[0][0] == line2[0][0] and line1[0][1] == line2[0][1] and line1[1][0] == line2[1][0] and \
+                        line1[1][1] == line2[1][1]:
+                    f = True
+            if f == False:
+                path1.append(line2)
+
+    def implement_move(self, path_points, tmp_current_pos, allowable_points, player):
         for allowable_point in self.allowable_points:
             self.uncolor_point(allowable_point)
         for line in path_points:
             self.lines.append(line)
-        self.last_move = path_points
-        self.draw_lines(path_points)
-        self.current_point = tmp_current_pos
+        if player == self.player:
+            self.concat_paths(self.last_move, path_points)
+            self.draw_lines_colored(self.last_move)
+        else:
+            self.draw_lines(self.last_move)
+            self.last_move = path_points
+            self.draw_lines_colored(self.last_move)
+
+        self.uncolor_point(self.current_point)
         self.allowable_points = allowable_points
         self.color_allowable_points()
+        if player == self.player:
+            pass
+        else:
+            self.uncolor_point(self.last_point)
+            self.last_point = self.current_point
+            self.color_last_point()
+
+        self.current_point = tmp_current_pos
+
+
         self.color_current_point()
+        self.player = player
+
+        print(player,tmp_current_pos)
+        if (player==1 and allowable_points is None) or (player == 1 and tmp_current_pos[0] == 0 and tmp_current_pos[1] == 4):
+            self.label_win_lose = tk.Label(self.canvas, text="You won!!!", font=LARGE_FONT, width=20)
+            self.label_win_lose.pack(pady=220, padx=0)
+        if (player == -1 and (len(allowable_points) == 0 or (tmp_current_pos[0] == 12 and tmp_current_pos[1] == 4))) or (player==1 and len(allowable_points)==0):
+            self.label_win_lose = tk.Label(self.canvas, text="You lost!!!", font=LARGE_FONT, width=20)
+            self.label_win_lose.pack(pady=220, padx=0)

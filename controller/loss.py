@@ -17,6 +17,3 @@ def softmax_cross_entropy_with_logits(y_true, y_pred):
     loss = tf.nn.softmax_cross_entropy_with_logits(labels=pi, logits=p)
     return loss
 
-# a=softmax_cross_entropy_with_logits([0.0,0.0],[1.0,1.0])
-# with tf.Session() as sess:
-#     print(a.eval())
