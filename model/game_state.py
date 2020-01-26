@@ -105,6 +105,7 @@ class GameState:
             tmp_path.append(neighbour)
             get_full_moves_utils(self, tmp_path, tmp_board, (x, y), full_moves, max_moves=max_moves,
                                  full_moves_final=full_moves_final)
+            del tmp_board, tmp_path
 
         def get_full_moves_utils(self, path, board, tmp_current_pos, full_moves, c_p=self.current_position,
                                  max_moves=max_moves,
@@ -171,6 +172,7 @@ class GameState:
         end = time.time()
         log('elapsed seconds checking:', end - start)
         log('final_moves', len(full_moves_final))
+        del full_moves
         return full_moves_final
 
     def get_full_moves_simple(self, max_moves=config.MAX_MOVES_SIMPLE, max_time=config.MAX_TIME_CHECKING_SIMPLE):

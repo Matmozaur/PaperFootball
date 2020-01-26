@@ -240,19 +240,46 @@ class NewGameBB(tk.Frame):
     def generate_result(self, p1, p2, num):
         # self.T.insert(tk.END, p1+p2)
         # print(num)
-        if p1 == "Random":
-            player1 = Agent('Random', model=RandomModel())
-        elif p1 == "Forward":
-            player1 = Agent('Forward', model=ForwardModel())
-        else:
-            player1 = pickle.load(open('../controller/temp_fw_trained', "rb"))
+        if p1 == "Random_simple":
+            player1 = Agent('Random_simple',  RandomModel(), search_mode='simple', eval_mode='model')
+        elif p1 == "Random_deep":
+            player1 = Agent('Random_deep',  RandomModel(), search_mode='deep', eval_mode='model')
+        elif p1 == "Forward_simple":
+            player1 = Agent('Forward_simple',  ForwardModel(), search_mode='simple', eval_mode='model')
+        elif p1 == "Forward_deep":
+            player1 = Agent('Forward_deep',  ForwardModel(), search_mode='deep', eval_mode='model')
+        elif p1 == "MCTS_simple":
+            player1 = Agent('MCTS_simple',  RandomModel(), eval_mode='mcts_simple')
+        elif p1 == "DNN_deep":
+            best_nn = DNN()
+            best_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check_trained.h5')
+            player1 = Agent('DNN_deep',  best_nn, search_mode='deep', eval_mode='model')
+        elif p1 == "Residual_CNN_MCTS":
 
-        if p2 == "Random":
-            player2 = Agent('Random', model=RandomModel())
-        elif p2 == "Forward":
-            player2 = Agent('Forward', model=ForwardModel())
-        else:
-            player2 = pickle.load(open('../controller/temp_fw_trained', "rb"))
+            player1 = Agent('Residual_CNN_MCTS',  RandomModel(), search_mode='deep', eval_mode='mcts_boosted')
+
+        if p2 == "Random_simple":
+            player2 = Agent('Random_simple', RandomModel(), search_mode='simple', eval_mode='model')
+        elif p2 == "Random_deep":
+            player2 = Agent('Random_deep', RandomModel(), search_mode='deep', eval_mode='model')
+        elif p2 == "Forward_simple":
+            player2 = Agent('Forward_simple', ForwardModel(), search_mode='simple', eval_mode='model')
+        elif p2 == "Forward_deep":
+            player2 = Agent('Forward_deep', ForwardModel(), search_mode='deep', eval_mode='model')
+        elif p2 == "MCTS_simple":
+            player2 = Agent('MCTS_simple', RandomModel(), eval_mode='mcts_simple')
+        elif p2 == "DNN_deep":
+            nn = DNN()
+            nn.model = tf.keras.models.load_model('../resources/DNN_deep_check_trained.h5')
+            player2 = Agent('DNN_deep', nn, search_mode='deep', eval_mode='model')
+        elif p2 == "Residual_CNN_MCTS":
+
+            player2 = Agent('Residual_CNN_MCTS', RandomModel(), search_mode='deep', eval_mode='mcts_boosted')
+
+        # if p2 == "Rndom":
+        #     player2 = Agent('Random', model=RandomModel())
+        # elif p2 == "Forward":
+        #     player2 = Agent('Forward', model=ForwardModel())
 
 
         res = playing.play_valid(player1,player2,num)
@@ -261,20 +288,22 @@ class NewGameBB(tk.Frame):
 class BBMenu(tk.Frame):
 
     def __init__(self, parent, controller):
-        self.p1_val = ["Random"]
-        self.p2_val = ["Random"]
+        self.p1_val = ["Random_simple"]
+        self.p2_val = ["Random_simple"]
         tk.Frame.__init__(self, parent)
         label1 = tk.Label(self, text="Player 1", font=LARGE_FONT)
         label1.pack(pady=10, padx=10)
         variable1 = tk.StringVar(self)
-        variable1.set("Random")
-        p1 = tk.OptionMenu(self, variable1, "Random", "Forward", "Intelligent", command= (lambda x: self.assign(self.p1_val, x)))
+        variable1.set("Random_simple")
+        p1 = tk.OptionMenu(self, variable1, "Random_simple", "Random_deep", "Forward_simple", "Forward_deep", "MCTS_simple",
+        "DNN_deep", "Residual_CNN_MCTS", command= (lambda x: self.assign(self.p1_val, x)))
         p1.pack()
         label2 = tk.Label(self, text="Player 2", font=LARGE_FONT)
         label2.pack(pady=10, padx=10)
         variable2 = tk.StringVar(self)
-        variable2.set("Random")
-        p2 = tk.OptionMenu(self, variable2, "Random", "Forward", "Intelligent",  command= (lambda x: self.assign(self.p2_val, x)))
+        variable2.set("Random_simple")
+        p2 = tk.OptionMenu(self, variable2, "Random_simple", "Random_deep", "Forward_simple", "Forward_deep", "MCTS_simple",
+        "DNN_deep", "Residual_CNN_MCTS",  command= (lambda x: self.assign(self.p2_val, x)))
         p2.pack()
         label3 = tk.Label(self, text="Number of epochs", font=LARGE_FONT)
         label3.pack(pady=10, padx=10)

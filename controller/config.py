@@ -1,6 +1,6 @@
 # For self-playing
-EPISODES =30
-MEMORY_SIZE = 4000
+EPISODES =3
+MEMORY_SIZE = 30000
 TURNS_UNTIL_DET = 4
 
 # For MCTS
@@ -25,26 +25,23 @@ MAX_TIME_RANDOM = 0.001
 
 # for learning
 SHUFFLE = True
-
+PARAMS_DNN = {
+                'activation_hidden': 'sigmoid', 'activation': 'sigmoid', 'optimizer': 'adam',
+                'architectures': [[100, 0.0], [400, 0.000001], ['dropout', 0.1], [200, 0.000001], ['dropout', 0.2],
+                                  [200, 0.000001],
+                                  ['dropout', 0.3], [100, 0.0], [20, 0.0]]}
 BATCH_SIZE = 32
-EPOCHS = 20
+EPOCHS = 1
+TRAINING_LOOPS = 1
 VALIDATION_SPLIT = 0.1
 REG_CONST = 0.05
 LEARNING_RATE = 0.05
 MOMENTUM = 0.01
-TRAINING_LOOPS = 1
 INPUT_SHAPE = (48,8,1)
-HIDDEN_CNN_LAYERS = [
-    {'filters': 384, 'kernel_size': (12, 3)}
-    , {'filters': 384, 'kernel_size': (8, 2)}
-    # , {'filters': 384, 'kernel_size': (12, 3)}
-    # , {'filters': 192, 'kernel_size': (6, 3)}
-    # , {'filters': 86, 'kernel_size': (4, 4)}
-    # , {'filters': 300, 'kernel_size': (12, 3)}
-]
+
 
 # For evaluate
-EVAL_EPISODES = 8
+EVAL_EPISODES = 4
 SCORING_THRESHOLD = 1.1
 
 # For logging

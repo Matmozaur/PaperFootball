@@ -9,7 +9,7 @@ from model.ml_module.memory import Memory
 # from model.ml_module.ml_models import Residual_NN_simple
 import pickle
 import tensorflow as tf
-from model.ml_module.ml_models import DNN
+from model.ml_module.ml_models import DNN, ResidualCNN
 
 
 def main_train(best_player, current_player, memory, iterations):
@@ -18,30 +18,28 @@ def main_train(best_player, current_player, memory, iterations):
         i += 1
         log_important('Iteration ', i)
         play_training(best_player, best_player, memory, config.EPISODES, config.TURNS_UNTIL_DET)
-        if len(memory.ltmemory) >= config.MEMORY_SIZE:
-            current_player.retrain(memory)
-            memory.clear_ltmemory()
-            scores = play_valid(current_player, best_player, config.EVAL_EPISODES, random_moves=2)
-            log_important(scores)
-            if ((scores['current_player'] + 1) / (scores['best_player'] + 1)) > config.SCORING_THRESHOLD:
-                best_player.model.model.set_weights(current_player.model.model.get_weights())
-                file = open('temp', 'wb')
-                pickle.dump(best_player, file)
+        current_player.retrain(memory)
+        memory.clear_ltmemory()
+        scores = play_valid(current_player, best_player, config.EVAL_EPISODES, random_moves=2)
+        log_important(scores)
+        if ((scores['current_player'] + 1) / (scores['best_player'] + 1)) > config.SCORING_THRESHOLD:
+            best_player.model.model.set_weights(current_player.model.model.get_weights())
+            best_player.model.model.save('../resources/Residual_CNN_mcts_trained.h5')
 
     return best_player
 
 
-current_nn = DNN()
-best_nn = DNN()
-current_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check.h5')
-best_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check.h5')
+current_nn = ResidualCNN()
+best_nn = ResidualCNN()
+current_nn.model = tf.keras.models.load_model('../resources/Residual_CNN_mcts.h5')
+best_nn.model = tf.keras.models.load_model('../resources/Residual_CNN_mcts.h5')
 best_nn.model.set_weights(current_nn.model.get_weights())
 memory = Memory(config.MEMORY_SIZE)
-current_player = Agent('current_player', current_nn)
-best_player = Agent('best_player', best_nn)
+current_player = Agent('current_player', current_nn, eval_mode='mcts_boosted')
+best_player = Agent('best_player', best_nn, eval_mode='mcts_boosted')
 
-main_train(best_player, current_player, memory, 30)
-best_player.model.save('../resources/DNN_deep_check_trained.h5')
+main_train(best_player, current_player, memory, 10)
+best_player.model.model.save('../resources/Residual_CNN_mcts_trained.h5')
 
 # memory = Memory(config.MEMORY_SIZE)
 # player1 = Agent('mcts_player1', RandomModel(), search_mode='simple', eval_mode='mcts_simple')

@@ -101,4 +101,6 @@ class Agent:
         else:
             if turn < random_moves:
                 return random.uniform(0, 1)
-            return self.model.predict(env_test.gameState.board, env_test.gameState.current_position)
+            score = self.model.predict(env_test.gameState.board, env_test.gameState.current_position)
+            del env_test
+            return score
