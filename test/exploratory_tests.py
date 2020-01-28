@@ -17,8 +17,11 @@ Playing matches between 2 bots
 
 best_nn = ResidualCNN()
 best_nn.model = tf.keras.models.load_model('../resources/Residual_CNN_mcts.h5')
-player1 = Agent('my_player', best_nn)
-player2 = Agent('random',  RandomModel())
-player3 = Agent('forward_player',  ForwardModel(), search_mode = 'simple')
+player1 = Agent('my_player', best_nn, eval_mode='mcts_boosted')
+player2 = Agent('random',  RandomModel(),search_mode='simple')
+player3 = Agent('random_mcts',  RandomModel(), eval_mode='mcts_boosted')
+sc = play_valid(player1, player2, episodes=4)
+print(sc)
 sc = play_valid(player1, player3, episodes=4)
 print(sc)
+

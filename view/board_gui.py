@@ -59,7 +59,7 @@ class BoardGui:
         # print(self.env.gameState.get_move((2,6), (1,5)))
 
         # self.board.last_move.append((self.board.current_point, point))
-        print("env current: ", self.env.currentPlayer)
+        # print("env current: ", self.env.currentPlayer)
         self.board.implement_move([(self.board.current_point, point)], point, self.get_allowable_points(), self.env.currentPlayer)
         if len(self.get_allowable_points()) == 7:
             self.make_move()
@@ -138,7 +138,7 @@ class BoardGui:
         self.env.gameState.board[21, 4] = 1
         self.env.gameState.current_position = (4, 3)
         # print([self.env.gameState.get_move(x,y) for x,y in [[(4,3),(5,3)],[(5,3),(5,4)],[(5,4),(6,4)]]])
-        print(self.env.gameState.get_move((6, 4), (5, 4)))
+        # print(self.env.gameState.get_move((6, 4), (5, 4)))
         # print(self.env.gameState.get_full_moves())
         self.board.draw_lines([self.get_positions(x, y) for x, y in [(21, 4), (20, 3)]])
         # self.board.draw_lines([[(4,3),(5,3)],[(5,3),(5,4)],[(5,4),(6,4)]])
@@ -208,6 +208,7 @@ class NewGameBU(tk.Frame):
         best_nn = DNN()
         best_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check.h5')
         player = Agent('my_player', best_nn)
+        # player = Agent('my_player', ForwardModel())
         self.boardGui.bot = player
         self.boardGui.agent = self.boardGui.bot
         self.boardGui.env = Game()
@@ -255,8 +256,9 @@ class NewGameBB(tk.Frame):
             best_nn.model = tf.keras.models.load_model('../resources/DNN_deep_check_trained.h5')
             player1 = Agent('DNN_deep',  best_nn, search_mode='deep', eval_mode='model')
         elif p1 == "Residual_CNN_MCTS":
-
-            player1 = Agent('Residual_CNN_MCTS',  RandomModel(), search_mode='deep', eval_mode='mcts_boosted')
+            nn = DNN()
+            nn.model = tf.keras.models.load_model('../resources/Residual_CNN_mcts.h5')
+            player2 = Agent('DNN_deep', nn, search_mode='deep', eval_mode='mcts_boosted')
 
         if p2 == "Random_simple":
             player2 = Agent('Random_simple', RandomModel(), search_mode='simple', eval_mode='model')
@@ -273,8 +275,9 @@ class NewGameBB(tk.Frame):
             nn.model = tf.keras.models.load_model('../resources/DNN_deep_check_trained.h5')
             player2 = Agent('DNN_deep', nn, search_mode='deep', eval_mode='model')
         elif p2 == "Residual_CNN_MCTS":
-
-            player2 = Agent('Residual_CNN_MCTS', RandomModel(), search_mode='deep', eval_mode='mcts_boosted')
+            nn = DNN()
+            nn.model = tf.keras.models.load_model('../resources/Residual_CNN_mcts.h5')
+            player2 = Agent('DNN_deep', nn, search_mode='deep', eval_mode='mcts_boosted')
 
         # if p2 == "Rndom":
         #     player2 = Agent('Random', model=RandomModel())
